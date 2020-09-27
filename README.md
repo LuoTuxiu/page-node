@@ -1,8 +1,10 @@
 # page-node
 
-一个 nodejs + mongoodb + apollo + graphql 服务端 demo，对应的前端代码是
+一个 nodejs + mongoodb + apollo + graphql 服务端 demo，对应的前端仓库是
 
 [auto-page-web](https://github.com/LuoTuxiu/auto-page-web)
+
+## 开始开发
 
 1. 启动 mongod
 
@@ -33,9 +35,9 @@ V0.1 版本
 1. 实现 nodejs + mongoodb + apollo + graphql run 起来
 2. 与前台实现简单登录、注册 demo 接口
 
-###
+<!-- ### -->
 
-V0.1 版本
+<!-- V0.1 版本 -->
 
 ### todo
 

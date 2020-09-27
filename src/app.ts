@@ -8,6 +8,10 @@ import headerHandle from './middleware/headerHandle';
 import controller from './controllers';
 import config from './config';
 
+const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
+
+global.CONFIG = CONFIG
+
 const app = new Koa();
 app.use(koaBody());
 
