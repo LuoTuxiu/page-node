@@ -16,7 +16,7 @@
     "test:unit": "cd ./__tests__/unit;check_file=`ls  | grep '.test.ts' |  tr -s '\n'`;jest --findRelatedTests $check_file",
     "test:e2e": "cd ./__tests__/e2e;check_file=`ls  | grep '.spec.ts' |  tr -s '   n'`;jest --findRelatedTests $check_file",
     "test:service": "cd ./__tests__/service;check_file=`ls  | grep '.spec.ts' |  tr -s '\n'`;jest --detectOpenHandles --findRelatedTests $check_file",
-    "test": "cross-env NODE_ENV=test jest --no-cache --colors --coverage --forceExit --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test jest --passWithNoTests --no-cache --colors --coverage --forceExit --detectOpenHandles",
     "lint": "eslint --fix --ext tsx,ts src __tests__",
     "prettier": "prettier --write --check ./**/*.{ts,tsx,less}",
     "coverage": "codecov",

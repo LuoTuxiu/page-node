@@ -64,7 +64,7 @@ const postJuejinDraft = async ({ id, category_id } = {}) => {
     console.warn(`check postJuejinDraft`);
     return;
   }
-const params = {
+  const params = {
     data: {
       id,
       category_id,
@@ -75,7 +75,10 @@ const params = {
       brief_content: '',
       edit_type: 10,
       html_content: 'deprecated',
-      mark_content: require('fs').readFileSync('/Users/tuxiuluo/Documents/Learn-note/docs/front/js/面试官-手写一个深拷贝.md', 'utf8')
+      mark_content: require('fs').readFileSync(
+        '/Users/tuxiuluo/Documents/Learn-note/docs/front/js/面试官-手写一个深拷贝.md',
+        'utf8'
+      )
     }
   };
   const [err, data] = await postJuejinUpdateDraftApi(params);
@@ -107,7 +110,7 @@ const postJuejinPublish = async ({ id }) => {
 // 获取文章列表
 const getJuejinArticleList = async () => {
   const params = {
-    data: {"user_id":"2752832846174765","sort_type":2,"cursor":"0"}
+    data: { user_id: '2752832846174765', sort_type: 2, cursor: '0' }
   };
   const [err, data] = await getJuejinArticleListApi(params);
   if (err) {
@@ -117,7 +120,6 @@ const getJuejinArticleList = async () => {
   }
   console.log('获取文章列表成功');
   console.log(data);
-
 };
 
 const juejinAddBlog = async () => {
@@ -129,7 +131,7 @@ const juejinAddBlog = async () => {
     category_id
   });
   const { id } = createData;
-  console.log(`草稿id 是 ${id}`)
+  console.log(`草稿id 是 ${id}`);
   await postJuejinDraft({
     category_id,
     id
@@ -137,7 +139,7 @@ const juejinAddBlog = async () => {
   // await postJuejinPublish({
   //   id
   // });
-  await getJuejinArticleList()
+  // await getJuejinArticleList()
 };
 export {
   getJuejinCategory,
