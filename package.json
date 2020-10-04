@@ -24,7 +24,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run prettier",
+      "pre-commit": "echo \"test luo\" && npm run prettier",
       "pre-push": "eslint --fix --ext tsx,ts src __tests__"
     }
   },
