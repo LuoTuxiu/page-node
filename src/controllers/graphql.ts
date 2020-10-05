@@ -1,8 +1,14 @@
-import { ApolloServer, gql, ApolloError, UserInputError } from 'apollo-server-koa';
+import {
+  ApolloServer,
+  gql,
+  ApolloError,
+  UserInputError
+} from 'apollo-server-koa';
 import * as Koa from 'koa';
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import userModel from '../models/userModel';
+import blogModel from '../models/blogModel';
 
 interface Iyear {
   year: number;
@@ -30,6 +36,16 @@ interface Ipvs {
 
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
+    type Blog {
+      id: String
+      title: String
+      content: String
+      createTime: Float
+      category: [String]
+      originPath: String
+      updateTime: Float
+    }
+
     type Page {
       _id: ID
       url: String
@@ -70,6 +86,7 @@ function initGraphQL(app: Koa): void {
       userInfo: User
       pageList(page: Int, limit: Int): [Page]
       pageDetail(_id: String): Page
+      blogList: [Blog]
     }
 
     type Mutation {
@@ -78,6 +95,7 @@ function initGraphQL(app: Koa): void {
       register(name: String, passwd: String): ApiData
       updatePage(_id: String, url: String): ApiData
       addPage(url: String, content: String): ApiData
+      addBlog(content: String): ApiData
     }
 
     schema {
@@ -88,6 +106,12 @@ function initGraphQL(app: Koa): void {
 
   const resolvers = {
     Query: {
+      blogList: async (_parent: never, args: any) => {
+        console.log(`graphql-blogList`);
+        const result = await blogModel.queryList();
+        console.log(`blogList`);
+        return result;
+      },
       pageList: async (_parent: never, args: any) => {
         let result: boolean | page.Item[];
         result = await pageModel.query(args);
@@ -113,7 +137,7 @@ function initGraphQL(app: Koa): void {
         return { ...result[0], roles: ['admin'] };
         // }
         // return false;
-      },
+      }
     },
     Mutation: {
       login: async (_parent: never, args: LoginParams): Promise => {
@@ -127,8 +151,8 @@ function initGraphQL(app: Koa): void {
           };
         }
         const findUser: user.Info[] = await userModel.query(query);
-        if(findUser.length === 0) {
-          throw new ApolloError('user error')
+        if (findUser.length === 0) {
+          throw new ApolloError('user error');
           // return Promise.reject(new Error('user error'))
         }
         return { ...findUser[0], token: new Date().getTime() };
@@ -138,10 +162,10 @@ function initGraphQL(app: Koa): void {
           code: 200,
           data: '',
           msg: '退出成功'
-        }
-        return new Promise((resolve) => {
-          resolve(result)
-        })
+        };
+        return new Promise(resolve => {
+          resolve(result);
+        });
       },
       register: async (
         _parent: never,
@@ -159,14 +183,13 @@ function initGraphQL(app: Koa): void {
           return new Promise(resolve => {
             resolve(result);
           });
-        } 
+        }
         throw new UserInputError('some require', {
           // code: 20008
           invalidArgs: 'name'
-        })
-          // throw new ApolloError('register error', 20008)
-          // return Promise.reject(new Error('register error'))
-        
+        });
+        // throw new ApolloError('register error', 20008)
+        // return Promise.reject(new Error('register error'))
       },
       updatePage: async (_parent: never, args: any): Promise => {
         const result = await pageModel.update({ _id: args.id }, args);
@@ -176,6 +199,10 @@ function initGraphQL(app: Koa): void {
       addPage: async (_parent: never, args: any): Promise => {
         const result = await pageModel.add(args);
         console.log(result);
+        return result;
+      },
+      addBlog: async (_parent: never, args: any) => {
+        const result = await blogModel.addBlog(args);
         return result;
       }
     }
