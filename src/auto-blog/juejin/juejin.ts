@@ -6,6 +6,7 @@ import {
   postJuejinCreateDraftApi,
   getJuejinArticleListApi
 } from '../api/juejin';
+import juejinModel from '../../models/juejinModel'
 
 // 获取分类
 const getJuejinCategory = async () => {
@@ -118,8 +119,11 @@ const getJuejinArticleList = async () => {
     console.log(err);
     return;
   }
+  data.forEach(async item => {
+    await juejinModel.syncJuejinToLocal(item.article_info)
+  })
   console.log('获取文章列表成功');
-  console.log(data);
+  // console.log(data);
 };
 
 const juejinAddBlog = async () => {
@@ -139,7 +143,7 @@ const juejinAddBlog = async () => {
   // await postJuejinPublish({
   //   id
   // });
-  // await getJuejinArticleList()
+  await getJuejinArticleList()
 };
 export {
   getJuejinCategory,
