@@ -8,6 +8,7 @@ request.interceptors.request.use(config => {
   return {
     ...config,
     headers: {
+      ...config.headers || {},
       'Content-type': 'application/json;',
       Cookie: global.CONFIG.Cookie
     }

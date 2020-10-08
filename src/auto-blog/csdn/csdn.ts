@@ -1,21 +1,21 @@
 import {
-  getJuejinTagsApi,
-  postJuejinUpdateDraftApi,
-  postJuejinPublishApi,
-  getJuejinCategoryApi,
-  postJuejinCreateDraftApi,
-  getJuejinArticleListApi
-} from '../api/juejin';
-import juejinModel from '../../models/juejinModel'
+  getCsdnTagsApi,
+  postCsdnUpdateDraftApi,
+  postCsdnPublishApi,
+  getCsdnCategoryApi,
+  postCsdnCreateDraftApi,
+  getCsdnArticleListApi
+} from '../api/csdn';
+import csdnModel from '../../models/csdnModel'
 
 // 获取分类
-const getJuejinCategory = async () => {
+const getCsdnCategory = async () => {
   const params = {
     data: {}
   };
-  const [err, data] = await getJuejinCategoryApi(params);
+  const [err, data] = await getCsdnCategoryApi(params);
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('postCsdnDraft error');
     console.log(err);
     return;
   }
@@ -24,7 +24,7 @@ const getJuejinCategory = async () => {
 };
 
 // 创建草稿
-const postJuejinCreateDraft = async () => {
+const postCsdnCreateDraft = async () => {
   const params = {
     data: {
       category_id: '6809637772874219534',
@@ -38,9 +38,9 @@ const postJuejinCreateDraft = async () => {
       mark_content: ''
     }
   };
-  const [err, data] = await postJuejinCreateDraftApi(params);
+  const [err, data] = await postCsdnCreateDraftApi(params);
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('postCsdnDraft error');
     console.log(err);
     return;
   }
@@ -48,9 +48,9 @@ const postJuejinCreateDraft = async () => {
   return Promise.resolve([err, data]);
 };
 
-const getJuejinTags = async () => {
+const getCsdnTags = async () => {
   try {
-    const data = await getJuejinTagsApi();
+    const data = await getCsdnTagsApi();
     console.log(`-----------`);
   } catch (err) {
     console.log(`xxxxxxxxxxx`);
@@ -59,9 +59,9 @@ const getJuejinTags = async () => {
 };
 
 // 更新草稿
-const postJuejinDraft = async ({ id, category_id } = {}) => {
+const postCsdnDraft = async ({ id, category_id } = {}) => {
   if (!id || !category_id) {
-    console.warn(`check postJuejinDraft`);
+    console.warn(`check postCsdnDraft`);
     return;
   }
   const params = {
@@ -81,10 +81,10 @@ const postJuejinDraft = async ({ id, category_id } = {}) => {
       )
     }
   };
-  const [err, data] = await postJuejinUpdateDraftApi(params);
+  const [err, data] = await postCsdnUpdateDraftApi(params);
   console.log('88888888888');
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('postCsdnDraft error');
     console.log(err);
     return;
   }
@@ -93,14 +93,14 @@ const postJuejinDraft = async ({ id, category_id } = {}) => {
 };
 
 // 发布
-const postJuejinPublish = async ({ id }) => {
+const postCsdnPublish = async ({ id }) => {
   const params = {
     data: { draft_id: id }
   };
-  const [err, data] = await postJuejinPublishApi(params);
+  const [err, data] = await postCsdnPublishApi(params);
   console.log('88888888888');
   if (err) {
-    console.log('postJuejinPublish error');
+    console.log('postCsdnPublish error');
     console.log(err);
     return;
   }
@@ -108,47 +108,48 @@ const postJuejinPublish = async ({ id }) => {
 };
 
 // 获取文章列表
-const getJuejinArticleList = async () => {
+const getCsdnArticleList = async () => {
   const params = {
     data: { user_id: '2752832846174765', sort_type: 2, cursor: '0' }
   };
-  const [err, data] = await getJuejinArticleListApi(params);
+  const [err, data] = await getCsdnArticleListApi(params);
   if (err) {
-    console.log('postJuejinPublish error');
+    console.log('postCsdnPublish error');
     console.log(err);
     return;
   }
   data.forEach(async item => {
-    await juejinModel.syncJuejinToLocal(item.article_info)
+    await csdnModel.syncCsdnToLocal(item.article_info)
   })
   console.log('获取文章列表成功');
   // console.log(data);
 };
 
 const juejinAddBlog = async () => {
-  const [err, categoryData] = await getJuejinCategory();
-  const { category_id } = categoryData.find(
-    item => item.category.category_name === '前端'
-  );
-  const [, createData] = await postJuejinCreateDraft({
-    category_id
-  });
-  const { id } = createData;
-  console.log(`草稿id 是 ${id}`);
-  await postJuejinDraft({
-    category_id,
-    id
-  });
-  // await postJuejinPublish({
+  // const [err, categoryData] = await getCsdnCategory();
+  // const { category_id } = categoryData.find(
+  //   item => item.category.category_name === '前端'
+  // );
+  // const [, createData] = await postCsdnCreateDraft({
+  //   category_id
+  // });
+  // const { id } = createData;
+  // console.log(`草稿id 是 ${id}`);
+  // await postCsdnDraft({
+  //   category_id,
   //   id
   // });
-  await getJuejinArticleList()
+  // await postCsdnPublish({
+  //   id
+  // });
+  await getCsdnArticleList()
 };
 export {
-  getJuejinCategory,
-  postJuejinCreateDraft,
-  getJuejinTags,
-  postJuejinDraft,
-  postJuejinPublish,
-  juejinAddBlog
+  getCsdnCategory,
+  postCsdnCreateDraft,
+  getCsdnTags,
+  postCsdnDraft,
+  postCsdnPublish,
+	juejinAddBlog,
+	getCsdnArticleList
 };
