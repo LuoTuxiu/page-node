@@ -27,7 +27,7 @@ export function handleFileFromDir(dir) {
 			if (stat && stat.isDirectory()) {
 				list = list.concat(handleFileFromDir(file));
 			} else {
-				file.indexOf('.md') !== -1 && list.push(file);
+				file.indexOf('README.md') === -1 && file.indexOf('.md') !== -1 && list.push(file);
 			}
 		});
 	return list;

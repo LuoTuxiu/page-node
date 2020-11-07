@@ -34,14 +34,14 @@ module.exports = {
       }
    ]
   },
-  // 解决不能直接默认导入 ts 文件 的问题。import/no-unresolved
-  settings: {
-    "import/resolver": {
-      "webpack": {
-        "config": "build/webpack.base.config.js"
-      }
-    }
-  },
+  // // 解决不能直接默认导入 ts 文件 的问题。import/no-unresolved
+  // settings: {
+  //   "import/resolver": {
+  //     "webpack": {
+  //       "config": "build/webpack.base.config.js"
+  //     }
+  //   }
+  // },
   overrides: [
     {
       "files": ["*.ts"],

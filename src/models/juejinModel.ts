@@ -33,18 +33,29 @@ const juejinSechema = new mogoose.Schema({
 	"status": Number,
 	"verify_status": Number,
 	"audit_status": Number,
-	"mark_content": String
+	"mark_content": String,
+	"origin_blog_id": String,
 })
 
 const juejinCol = mogoose.model('juejin', juejinSechema)
 
 const JuejinModel = {
-	async syncJuejinToLocal(params: object) {
+	async syncJuejinToLocal(params: object = {}) {
+		console.log(`即将写入掘金列表数据库`)
+		console.log(params);
 		const juejin = new juejinCol(params)
-		const result = await juejin.save(error => {
-			error && console.warn(error);
-		})
+		const result = await juejinCol.updateOne({
+			article_id: params.article_id
+		}, params, {
+      upsert: true
+    })
+		console.log(`params.article_id is ${params.article_id}`);
 		return result
+	},
+	async deleteLocalJuejin(params = {}) {
+		const {id} = params
+		await juejinCol.deleteOne({id})
+		console.log(`deleteLocalJuejin ${params.id} success`);
 	}
 }
 

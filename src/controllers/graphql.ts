@@ -8,7 +8,8 @@ import * as Koa from 'koa';
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import userModel from '../models/userModel';
-import blogModel from '../models/blogModel';
+import {updateBlogFiles} from '../auto-blog/localBlog'
+import {juejinAddBlog, deleteJuejinBlog} from '../auto-blog/juejin/juejin'
 
 interface Iyear {
   year: number;
@@ -36,32 +37,30 @@ interface Ipvs {
 
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
-    type Blog {
-      id: String
-      title: String
-      content: String
-      createTime: Float
-      category: [String]
-      originPath: String
-      updateTime: Float
-    }
-
     type Page {
-      _id: ID
+      id: ID
       url: String
       content: String
-      endTime: Int
-      updatedTime: Int
-      createdTime: Int
+      endTime: String
+      updateTime: String
+      createTime: String
       title: String
       description: String
       keyword: String
+      originPath: String
+      category: [String]
+      juejin_id: String
+    }
+
+    type Pages {
+      total: Int
+      list: [Page]
     }
 
     type User {
       name: String
       passwd: String
-      createdTime: Int
+      createTime: Int
       roles: [String]
     }
 
@@ -84,9 +83,9 @@ function initGraphQL(app: Koa): void {
 
     type Query {
       userInfo: User
-      pageList(page: Int, limit: Int): [Page]
+      pageList(page: Int, limit: Int): Pages
       pageDetail(_id: String): Page
-      blogList: [Blog]
+      blogList: [Page]
     }
 
     type Mutation {
@@ -95,7 +94,9 @@ function initGraphQL(app: Koa): void {
       register(name: String, passwd: String): ApiData
       updatePage(_id: String, url: String): ApiData
       addPage(url: String, content: String): ApiData
-      addBlog(content: String): ApiData
+      updateLocalBlog: ApiData
+      publishJuejinBlog(id: String): ApiData
+      deleteJuejinBlog(id: String, juejin_id: String): ApiData
     }
 
     schema {
@@ -106,21 +107,16 @@ function initGraphQL(app: Koa): void {
 
   const resolvers = {
     Query: {
-      blogList: async (_parent: never, args: any) => {
-        console.log(`graphql-blogList`);
-        const result = await blogModel.queryList();
-        console.log(`blogList`);
-        return result;
-      },
+      // blogList: async (_parent: never, args: any) => {
+      //   console.log(`graphql-blogList`);
+      //   const result = await blogModel.queryList();
+      //   console.log(`blogList`);
+      //   return result;
+      // },
       pageList: async (_parent: never, args: any) => {
         let result: boolean | page.Item[];
         result = await pageModel.query(args);
-        console.log(result);
-        console.log('pageList');
-        if (result.length > 0) {
-          return result;
-        }
-        return false;
+        return result
       },
       pageDetail: async (_parent: never, args: any) => {
         let result: page.Item;
@@ -197,13 +193,25 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.add(args);
+        const result = await pageModel.addBlog(args);
         console.log(result);
         return result;
       },
-      addBlog: async (_parent: never, args: any) => {
-        const result = await blogModel.addBlog(args);
-        return result;
+      updateLocalBlog: async () => {
+        const result = await updateBlogFiles()
+        return result
+      },
+      publishJuejinBlog: async (_parent: never, args: any) => {
+         const result = await juejinAddBlog(args)
+         await pageModel.updateBlog(result)
+         return result
+      },
+      deleteJuejinBlog: async (_parent: never, args: any) => {
+        const [err, result] = await deleteJuejinBlog({...args})
+        if (err) {
+          return err
+        } 
+          return result
       }
     }
   };

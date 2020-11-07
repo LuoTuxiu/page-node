@@ -3,8 +3,8 @@ import * as Koa from 'koa';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import initGraphQL from './graphql';
 // import {juejinAddBlog} from '../auto-blog/juejin/juejin'
-// import { listFiles } from '../auto-blog/localBlog/index';
-import {juejinAddBlog} from '../auto-blog/csdn/csdn'
+import { listFiles } from '../auto-blog/localBlog';
+// import {csdnAddBlog} from '../auto-blog/csdn/csdn'
 
 const router = new Router();
 
@@ -18,7 +18,7 @@ export default {
     //   postJuejinPublish();
     // });
     // juejinAddBlog()
-    juejinAddBlog()
-    // listFiles();
+    // csdnAddBlog()
+    listFiles();
   }
 };

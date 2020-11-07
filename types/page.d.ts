@@ -3,9 +3,9 @@ declare namespace page {
     _id: string;
     url: string;
     content: string;
-    updatedTime: number;
+    updateTime: number;
     endTime: number;
-    createdTime: number;
+    createTime: number;
     title: string;
     description: string;
     keyword: string;

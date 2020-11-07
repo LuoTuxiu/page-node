@@ -31,34 +31,28 @@ const compress = async () => {
 	return await compressing.tgz.compressDir(localUrl, localTarUrl);
 };
 
-sftp
-	.connect({
-		...global.CONFIG.ftp,
-		readyTimeout: 10000,
-		retries: 2,
-	})
-	.then(async () => {
-		// return sftp.list('/home/luo');
-		await compress();
-		const buffer = fs.readFileSync(localTarUrl);
-		console.log(buffer);
-		console.log(remote);
-		return sftp.put(buffer, remote);
-		// let buffers = handleFileFromDir(localUrl);
-		// console.log('----------');
-		// console.log(_.flatMapDeep(buffers));
-		// return Promise.all(
-		// 	buffers.map((buffer) => {
-		// 		console.log(`${buffer} ${remote}${buffer.split('dist')[1]}`);
-		// 		buffer && sftp.put(buffer, `${remote}${buffer.split('dist')[1]}`);
-		// 	})
-		// );
-	})
-	.then((data) => {
-		console.log('upload success');
-		console.log(data);
-		require('./node-ssh');
-	})
-	.catch((err) => {
-		console.warn(err);
-	});
+const putFileToRemote = async () => {
+	await compress();
+	const buffer = fs.readFileSync(localTarUrl);
+	console.log(buffer);
+	console.log(remote);
+	return sftp.put(buffer, remote);
+}
+
+const uploadLocalFile = async () => {
+	try {
+		await sftp.list(remote)
+	} catch (error) {
+		await sftp.connect({
+			...global.CONFIG.ftp,
+			readyTimeout: 10000,
+			retries: 2,
+		})
+	}
+	await putFileToRemote()
+	await require('./node-ssh');
+}
+
+export {
+	uploadLocalFile
+}

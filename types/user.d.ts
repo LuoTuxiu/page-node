@@ -3,7 +3,7 @@ declare namespace user {
     _id: string;
     name: string;
     passwd: string;
-    createdTime: number;
+    createTime: number;
     roles: [string]
   }
 }

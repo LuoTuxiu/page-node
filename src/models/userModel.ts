@@ -5,7 +5,7 @@ const mongoose = DbHelper.connect();
 const UserSechema = new mongoose.Schema({
   name: String,
   passwd: String
-  // createdTime: {
+  // createTime: {
   //   type: Number,
   //   default: Date.now()
   // }

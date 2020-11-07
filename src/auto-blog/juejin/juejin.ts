@@ -1,10 +1,12 @@
+import PageModel from '../../models/pageModel';
 import {
   getJuejinTagsApi,
   postJuejinUpdateDraftApi,
   postJuejinPublishApi,
   getJuejinCategoryApi,
   postJuejinCreateDraftApi,
-  getJuejinArticleListApi
+  getJuejinArticleListApi,
+  deleteJuejinArticleApi
 } from '../api/juejin';
 import juejinModel from '../../models/juejinModel'
 
@@ -24,10 +26,10 @@ const getJuejinCategory = async () => {
 };
 
 // 创建草稿
-const postJuejinCreateDraft = async () => {
+const postJuejinCreateDraft = async (originParams) => {
   const params = {
     data: {
-      category_id: '6809637772874219534',
+      category_id: originParams.category_id,
       tag_ids: [],
       link_url: '',
       cover_image: '',
@@ -59,11 +61,17 @@ const getJuejinTags = async () => {
 };
 
 // 更新草稿
-const postJuejinDraft = async ({ id, category_id } = {}) => {
+const postJuejinDraft = async ({ id, category_id, origin_blog_id } = {}) => {
   if (!id || !category_id) {
     console.warn(`check postJuejinDraft`);
     return;
   }
+  const {content, title} = await PageModel.queryOne({ // 从本地读取博客信息
+    id: origin_blog_id
+  })
+  console.log(`开始打印读取的数据库信息`)
+  console.log(content);
+  console.log(title);
   const params = {
     data: {
       id,
@@ -71,18 +79,14 @@ const postJuejinDraft = async ({ id, category_id } = {}) => {
       tag_ids: ['6809640357354012685'],
       link_url: '',
       cover_image: '',
-      title: 'test',
+      title,
       brief_content: '',
       edit_type: 10,
       html_content: 'deprecated',
-      mark_content: require('fs').readFileSync(
-        '/Users/tuxiuluo/Documents/Learn-note/docs/front/js/面试官-手写一个深拷贝.md',
-        'utf8'
-      )
+      mark_content: content
     }
   };
   const [err, data] = await postJuejinUpdateDraftApi(params);
-  console.log('88888888888');
   if (err) {
     console.log('postJuejinDraft error');
     console.log(err);
@@ -98,13 +102,12 @@ const postJuejinPublish = async ({ id }) => {
     data: { draft_id: id }
   };
   const [err, data] = await postJuejinPublishApi(params);
-  console.log('88888888888');
   if (err) {
     console.log('postJuejinPublish error');
     console.log(err);
     return;
   }
-  console.log('成功发布');
+  return [err, data]
 };
 
 // 获取文章列表
@@ -114,35 +117,67 @@ const getJuejinArticleList = async () => {
   };
   const [err, data] = await getJuejinArticleListApi(params);
   if (err) {
-    console.log('postJuejinPublish error');
+    console.log('getJuejinArticleList error');
     console.log(err);
     return;
   }
-  data.forEach(async item => {
-    await juejinModel.syncJuejinToLocal(item.article_info)
-  })
+  // data.forEach(async item => {
+  //   await juejinModel.syncJuejinToLocal(item.article_info)
+  // })
   console.log('获取文章列表成功');
   // console.log(data);
 };
 
-const juejinAddBlog = async () => {
-  const [err, categoryData] = await getJuejinCategory();
+// 删除掘金博客
+const deleteJuejinBlog = async ({id, juejin_id}) => {
+  console.log(`即将要删除博客${juejin_id}`);
+  const [err, result] = await deleteJuejinArticleApi({
+    data: {'article_id': juejin_id}
+  })
+  if (!err) {
+    await juejinModel.deleteLocalJuejin({juejin_id})
+    return [, result]
+  }  
+    if (err.err_no === 404) {
+      console.log(`删除掘金在该行的记录`);
+      await PageModel.updateBlog({
+        juejin_id: '',
+        origin_blog_id: id
+      })
+    }
+    return [err]
+};
+
+const juejinAddBlog = async ({id}) => {
+  const [, categoryData] = await getJuejinCategory();
   const { category_id } = categoryData.find(
     item => item.category.category_name === '前端'
   );
   const [, createData] = await postJuejinCreateDraft({
     category_id
   });
-  const { id } = createData;
-  console.log(`草稿id 是 ${id}`);
   await postJuejinDraft({
     category_id,
-    id
+    id: createData.id,
+    'origin_blog_id': id
+  }, );
+  const [err, result] = await postJuejinPublish({
+    id: createData.id
   });
-  // await postJuejinPublish({
-  //   id
-  // });
-  await getJuejinArticleList()
+  console.log(`打印发布后的结果`);
+  console.log(err);
+  console.log(result);
+  
+  if (!err) {
+    await juejinModel.syncJuejinToLocal({...result, 
+      'origin_blog_id': id
+    })
+    return {
+      'article_id': result.article_id,
+      'origin_blog_id': id
+    }
+  }
+  // await getJuejinArticleList()
 };
 export {
   getJuejinCategory,
@@ -150,5 +185,6 @@ export {
   getJuejinTags,
   postJuejinDraft,
   postJuejinPublish,
-  juejinAddBlog
+  juejinAddBlog,
+  deleteJuejinBlog
 };

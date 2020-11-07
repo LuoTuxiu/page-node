@@ -82,3 +82,16 @@ export const getJuejinArticleListApi = async (params = {
   });
   return judgeApi(data)
 };
+
+// 删除掘金文章
+export const deleteJuejinArticleApi = async (params = {
+}) => {
+  const url = '/content_api/v1/article/delete';
+  const data = await request({
+    url,
+    baseURL: URL_JUEJIN,
+    method: 'POST',
+    ...params
+  });
+  return judgeApi(data)
+};

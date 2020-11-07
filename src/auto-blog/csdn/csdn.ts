@@ -125,7 +125,7 @@ const getCsdnArticleList = async () => {
   // console.log(data);
 };
 
-const juejinAddBlog = async () => {
+const csdnAddBlog = async () => {
   // const [err, categoryData] = await getCsdnCategory();
   // const { category_id } = categoryData.find(
   //   item => item.category.category_name === '前端'
@@ -150,6 +150,6 @@ export {
   getCsdnTags,
   postCsdnDraft,
   postCsdnPublish,
-	juejinAddBlog,
+	csdnAddBlog,
 	getCsdnArticleList
 };
