@@ -1,4 +1,4 @@
-import DbHelper from '../utils/dbHelper'
+import DbHelper from '@/utils/dbHelper'
 
 const mogoose = DbHelper.connect()
 
@@ -41,9 +41,6 @@ const juejinCol = mogoose.model('juejin', juejinSechema)
 
 const JuejinModel = {
 	async syncJuejinToLocal(params: object = {}) {
-		console.log(`即将写入掘金列表数据库`)
-		console.log(params);
-		const juejin = new juejinCol(params)
 		const result = await juejinCol.updateOne({
 			article_id: params.article_id
 		}, params, {

@@ -11,10 +11,6 @@ import userModel from '../models/userModel';
 import {updateBlogFiles} from '../auto-blog/localBlog'
 import {juejinAddBlog, deleteJuejinBlog} from '../auto-blog/juejin/juejin'
 
-interface Iyear {
-  year: number;
-}
-
 interface LoginParams {
   name: string;
   passwd: string;
@@ -29,10 +25,6 @@ interface ApiData {
   code: number;
   data: string;
   msg: string;
-}
-
-interface Ipvs {
-  routerName: string;
 }
 
 function initGraphQL(app: Koa): void {
@@ -84,7 +76,7 @@ function initGraphQL(app: Koa): void {
     type Query {
       userInfo: User
       pageList(page: Int, limit: Int): Pages
-      pageDetail(_id: String): Page
+      pageDetail(id: String): Page
       blogList: [Page]
     }
 
@@ -107,27 +99,16 @@ function initGraphQL(app: Koa): void {
 
   const resolvers = {
     Query: {
-      // blogList: async (_parent: never, args: any) => {
-      //   console.log(`graphql-blogList`);
-      //   const result = await blogModel.queryList();
-      //   console.log(`blogList`);
-      //   return result;
-      // },
       pageList: async (_parent: never, args: any) => {
-        let result: boolean | page.Item[];
-        result = await pageModel.query(args);
+        const result: boolean | page.Item[] =  await pageModel.query(args);
         return result
       },
       pageDetail: async (_parent: never, args: any) => {
-        let result: page.Item;
-        console.log('pageDetail');
-        result = await pageModel.query(args);
-        console.log(result);
-        return result[0];
+        const result: page.Item  = await pageModel.queryOne(args);
+        return result;
       },
       userInfo: async (_parent: never, args: any): Promise<any> => {
-        let result: boolean | user.Info[];
-        result = userModel.query(args);
+        const result: boolean | user.Info[] = userModel.query(args);
         // if (result.length > 0) {
         // todo
         return { ...result[0], roles: ['admin'] };
@@ -136,8 +117,7 @@ function initGraphQL(app: Koa): void {
       }
     },
     Mutation: {
-      login: async (_parent: never, args: LoginParams): Promise => {
-        console.log('进到这个查询语句了');
+      login: async (_parent: never, args: LoginParams) => {
         let query = {};
         if (args) {
           const { name, passwd } = args;
@@ -153,7 +133,7 @@ function initGraphQL(app: Koa): void {
         }
         return { ...findUser[0], token: new Date().getTime() };
       },
-      logout: async (_parent: never, args: any): Promise => {
+      logout: async (_parent: never, args: any) => {
         const result: ApiData = {
           code: 200,
           data: '',
@@ -167,9 +147,7 @@ function initGraphQL(app: Koa): void {
         _parent: never,
         args: RigisterParams
       ): Promise<ApiData> => {
-        console.log(args);
         const registerStatus = await userModel.add(args);
-        console.log(`registerStatus is ${registerStatus}`);
         if (registerStatus) {
           const result: ApiData = {
             code: 200,
@@ -189,12 +167,10 @@ function initGraphQL(app: Koa): void {
       },
       updatePage: async (_parent: never, args: any): Promise => {
         const result = await pageModel.update({ _id: args.id }, args);
-        console.log(result);
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
         const result = await pageModel.addBlog(args);
-        console.log(result);
         return result;
       },
       updateLocalBlog: async () => {

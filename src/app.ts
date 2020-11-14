@@ -1,12 +1,13 @@
 import Koa from 'koa';
 import log4js from 'log4js';
 import koaBody from 'koa-body';
+import 'module-alias/register'
 
-import ErrorHander from './middleware/ErrorHander';
-import AnalysicsHander from './middleware/AnalysicsHander';
-import headerHandle from './middleware/headerHandle';
-import controller from './controllers';
-import config from './config';
+import ErrorHander from '@/middleware/ErrorHander';
+import AnalysicsHander from '@/middleware/AnalysicsHander';
+import headerHandle from '@/middleware/headerHandle';
+import controller from '@/controllers';
+import config from '@/config';
 
 const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
 

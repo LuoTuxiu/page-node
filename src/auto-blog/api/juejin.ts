@@ -1,4 +1,4 @@
-import request from '../../utils/request';
+import request from '@/utils/request';
 
 const URL_JUEJIN = 'https://apinew.juejin.im';
 

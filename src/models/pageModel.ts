@@ -24,28 +24,20 @@ const PageCol = mogoose.model('blogs', pageSechema);
 
 const PageModel = {
   async query(params: object): Promise<any> {
-    console.log(params);
     const {page = 1, limit = 10, ...args} = params
     const offset = (page - 1 >= 0 ? page - 1 : 0) * limit
-    console.log('进入查询本地博客model层了');
-    const list = await PageCol.find(args).skip(offset).limit(limit) as unknown as page.Item[]
+    const list = await PageCol.find(args, null, {sort: {updateTime: -1}}).skip(offset).limit(limit) as unknown as page.Item[]
     return {
       total: PageCol.estimatedDocumentCount(),
       list
     };
   },
   async queryOne(params: object): Promise<any> {
-    console.log(params);
-    const {page = 1, limit = 10, ...args} = params
-    const offset = (page - 1 >= 0 ? page - 1 : 0) * limit
-    console.log('进入查询本地博客model层了');
-    const list = await PageCol.find(args).skip(offset).limit(limit) as unknown as page.Item[]
-    console.log(list)
-    return list && list[0]
-    ;
+    const {id} = params
+    const result =  await PageCol.findOne({id})
+    return result
   },
   async update(query: object, data: object): Promise<page.Item> {
-    console.log(...arguments);
     return (PageCol.findOneAndUpdate(
       query,
       data,
@@ -67,30 +59,28 @@ const PageModel = {
         console.log(error);
       }
     });
-    console.log(result);
     return result;
   },
   async addBlog(params: object, filePath): Promise<any> {
-    let result;
     const md5 = crypto.createHash('md5');
     const id = md5
       .update(filePath)
       // .update('docs/front/如何禁止谷歌浏览器自动填充密码.md')
       .digest('hex');
-    const now = new Date().getTime();
+    const isNew = !! await PageCol.exists({ id })
+    if (!isNew) {
+      return Promise.resolve(undefined)
+    }
     const newParams = {
       ...params,
       id,
-      createTime: `${now}`,
-      updateTime: `${now}`,
       originPath: filePath,
       title: filePath
         .split('/')
         .reverse()[0]
         .replace('.md', '')
     };
-    console.log(`id is ${id}`);
-    result = await PageCol.updateOne({id}, newParams, {
+    const result = await PageCol.updateOne({id}, newParams, {
       upsert: true
     })
     return result;
@@ -98,15 +88,11 @@ const PageModel = {
   // 'article_id': result.result,
   // 'origin_blog_id': id
   async updateBlog(params: object): Promise<any> {
-    console.log(`要写入本地博客了`)
-    console.log(params);
     const result = await PageCol.findOneAndUpdate({
       id: params.origin_blog_id
     }, {
       juejin_id: params.article_id
     });
-    console.log('更新本地blog数据库结果')
-    console.log(result);
     return result;
   }
 };

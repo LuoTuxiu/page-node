@@ -70,8 +70,6 @@ const postJuejinDraft = async ({ id, category_id, origin_blog_id } = {}) => {
     id: origin_blog_id
   })
   console.log(`开始打印读取的数据库信息`)
-  console.log(content);
-  console.log(title);
   const params = {
     data: {
       id,
@@ -92,7 +90,6 @@ const postJuejinDraft = async ({ id, category_id, origin_blog_id } = {}) => {
     console.log(err);
     return;
   }
-  console.log('成功更新草稿');
   return Promise.resolve([err, data]);
 };
 
@@ -130,14 +127,13 @@ const getJuejinArticleList = async () => {
 
 // 删除掘金博客
 const deleteJuejinBlog = async ({id, juejin_id}) => {
-  console.log(`即将要删除博客${juejin_id}`);
   const [err, result] = await deleteJuejinArticleApi({
     data: {'article_id': juejin_id}
   })
   if (!err) {
     await juejinModel.deleteLocalJuejin({juejin_id})
     return [, result]
-  }  
+  }
     if (err.err_no === 404) {
       console.log(`删除掘金在该行的记录`);
       await PageModel.updateBlog({
@@ -164,10 +160,6 @@ const juejinAddBlog = async ({id}) => {
   const [err, result] = await postJuejinPublish({
     id: createData.id
   });
-  console.log(`打印发布后的结果`);
-  console.log(err);
-  console.log(result);
-  
   if (!err) {
     await juejinModel.syncJuejinToLocal({...result, 
       'origin_blog_id': id
@@ -179,6 +171,7 @@ const juejinAddBlog = async ({id}) => {
   }
   // await getJuejinArticleList()
 };
+
 export {
   getJuejinCategory,
   postJuejinCreateDraft,
