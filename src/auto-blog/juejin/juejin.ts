@@ -1,3 +1,4 @@
+import { log } from 'console';
 import PageModel from '../../models/pageModel';
 import {
   getJuejinTagsApi,
@@ -8,7 +9,7 @@ import {
   getJuejinArticleListApi,
   deleteJuejinArticleApi
 } from '../api/juejin';
-import juejinModel from '../../models/juejinModel'
+import juejinModel from '../../models/juejinModel';
 
 // 获取分类
 const getJuejinCategory = async () => {
@@ -17,7 +18,7 @@ const getJuejinCategory = async () => {
   };
   const [err, data] = await getJuejinCategoryApi(params);
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('getJuejinCategory error');
     console.log(err);
     return;
   }
@@ -26,7 +27,7 @@ const getJuejinCategory = async () => {
 };
 
 // 创建草稿
-const postJuejinCreateDraft = async (originParams) => {
+const postJuejinCreateDraft = async originParams => {
   const params = {
     data: {
       category_id: originParams.category_id,
@@ -42,7 +43,7 @@ const postJuejinCreateDraft = async (originParams) => {
   };
   const [err, data] = await postJuejinCreateDraftApi(params);
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('postJuejinCreateDraft error');
     console.log(err);
     return;
   }
@@ -61,15 +62,16 @@ const getJuejinTags = async () => {
 };
 
 // 更新草稿
-const postJuejinDraft = async ({ id, category_id, origin_blog_id } = {}) => {
+const postUpdateJuejinDraft = async ({ id, category_id, blogId, content } = {}) => {
   if (!id || !category_id) {
-    console.warn(`check postJuejinDraft`);
+    console.warn(`check postUpdateJuejinDraft`);
     return;
   }
-  const {content, title} = await PageModel.queryOne({ // 从本地读取博客信息
-    id: origin_blog_id
-  })
-  console.log(`开始打印读取的数据库信息`)
+  const { title } = await PageModel.queryOne({
+    // 从本地读取博客信息
+    blogId
+  });
+  console.log(`开始打印读取的数据库信息`);
   const params = {
     data: {
       id,
@@ -86,7 +88,7 @@ const postJuejinDraft = async ({ id, category_id, origin_blog_id } = {}) => {
   };
   const [err, data] = await postJuejinUpdateDraftApi(params);
   if (err) {
-    console.log('postJuejinDraft error');
+    console.log('postUpdateJuejinDraft error');
     console.log(err);
     return;
   }
@@ -104,7 +106,7 @@ const postJuejinPublish = async ({ id }) => {
     console.log(err);
     return;
   }
-  return [err, data]
+  return [err, data];
 };
 
 // 获取文章列表
@@ -126,25 +128,37 @@ const getJuejinArticleList = async () => {
 };
 
 // 删除掘金博客
-const deleteJuejinBlog = async ({id, juejin_id}) => {
+const deleteJuejinBlog = async ({ blogId, juejin_id }) => {
   const [err, result] = await deleteJuejinArticleApi({
-    data: {'article_id': juejin_id}
-  })
-  if (!err) {
-    await juejinModel.deleteLocalJuejin({juejin_id})
-    return [, result]
-  }
-    if (err.err_no === 404) {
-      console.log(`删除掘金在该行的记录`);
-      await PageModel.updateBlog({
-        juejin_id: '',
-        origin_blog_id: id
-      })
+    data: { article_id: juejin_id }
+  });
+  console.log('====================================');
+  console.log(err)
+  console.log(result)
+  console.log('====================================');
+  if (!err || err.err_no === 404) {
+    console.log(`删除掘金在该行的记录`);
+    await PageModel.updateBlog({
+      juejin_id: '',
+      blogId
+    });
+    // await juejinModel.deleteLocalJuejin({ juejin_id });
+    return {
+      code: 200,
+      data: null,
+      msg: 'success'
     }
-    return [err]
+  }
+  if (err) {
+    console.warn('deleteJuejinBlog error')
+    console.log(err);
+    console.log(result);
+  }
+  return [err];
 };
 
-const juejinAddBlog = async ({id}) => {
+// 新建一篇掘金博客
+const juejinAddBlog = async ({ blogId, content }) => {
   const [, categoryData] = await getJuejinCategory();
   const { category_id } = categoryData.find(
     item => item.category.category_name === '前端'
@@ -152,22 +166,49 @@ const juejinAddBlog = async ({id}) => {
   const [, createData] = await postJuejinCreateDraft({
     category_id
   });
-  await postJuejinDraft({
+  await postUpdateJuejinDraft({
     category_id,
     id: createData.id,
-    'origin_blog_id': id
-  }, );
+    blogId,
+    content
+  });
   const [err, result] = await postJuejinPublish({
     id: createData.id
   });
   if (!err) {
-    await juejinModel.syncJuejinToLocal({...result, 
-      'origin_blog_id': id
-    })
+    await juejinModel.syncJuejinToLocal({ ...result, blogId });
     return {
-      'article_id': result.article_id,
-      'origin_blog_id': id
-    }
+      article_id: result.article_id,
+      blogId
+    };
+  }
+  // await getJuejinArticleList()
+};
+
+/**
+ * 更新单个掘金博客
+ * @param param0
+ */
+const updateJuejin = async ({ blogId, createData, content }) => {
+  const [, categoryData] = await getJuejinCategory();
+  const { category_id } = categoryData.find(
+    item => item.category.category_name === '前端'
+  );
+  await postUpdateJuejinDraft({
+    category_id,
+    id: createData.id,
+    blogId,
+    content
+  });
+  const [err, result] = await postJuejinPublish({
+    id: createData.id
+  });
+  if (!err) {
+    await juejinModel.syncJuejinToLocal({ ...result, blogId });
+    return {
+      article_id: result.article_id,
+      blogId
+    };
   }
   // await getJuejinArticleList()
 };
@@ -176,8 +217,9 @@ export {
   getJuejinCategory,
   postJuejinCreateDraft,
   getJuejinTags,
-  postJuejinDraft,
+  postUpdateJuejinDraft,
   postJuejinPublish,
   juejinAddBlog,
-  deleteJuejinBlog
+  deleteJuejinBlog,
+  updateJuejin
 };

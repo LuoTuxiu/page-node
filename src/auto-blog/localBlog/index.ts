@@ -1,28 +1,27 @@
-import fs from 'fs'
-import {handleFileFromDir} from '../../utils'
-import pageModel from '../../models/pageModel'
-import {uploadLocalFile} from './node-ftp'
+import fs from 'fs';
+import { handleFileFromDir } from '../../utils';
+import pageModel from '../../models/pageModel';
+import { uploadLocalFile } from './node-ftp';
 
-async function listFiles(filePath = '/Users/tuxiuluo/Documents/Learn-note/docs') {
-	const list = handleFileFromDir(filePath)
-	list.forEach(async item => {
-		const fsStat = fs.statSync(item)
-		await pageModel.addBlog({
-			content: fs.readFileSync(
-        item,
-        'utf8'
-			),
-			updateTime: fsStat.mtimeMs, // 更新时间取文件的更新时间
-			createTime: fsStat.birthtimeMs // 创建时间取文件的创建时间
-		}, `/docs${item.split('/docs')[1]}`,)
-	})
+async function getAllLocalBlog(
+  filePath = '/Users/tuxiuluo/Documents/Learn-note/docs'
+) {
+  const list = handleFileFromDir(filePath);
+  list.forEach(async item => {
+    const fsStat = fs.statSync(item);
+    await pageModel.addBlog(
+      {
+        content: fs.readFileSync(item, 'utf8'),
+        updateTime: fsStat.mtimeMs, // 更新时间取文件的更新时间
+        createTime: fsStat.birthtimeMs // 创建时间取文件的创建时间
+      },
+      `/docs${item.split('/docs')[1]}`
+    );
+  });
 }
 
 async function updateBlogFiles() {
-	uploadLocalFile()
+  uploadLocalFile();
 }
 
-export {
-	listFiles,
-	updateBlogFiles
-}
+export { getAllLocalBlog, updateBlogFiles };

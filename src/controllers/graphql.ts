@@ -8,8 +8,8 @@ import * as Koa from 'koa';
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import userModel from '../models/userModel';
-import {updateBlogFiles} from '../auto-blog/localBlog'
-import {juejinAddBlog, deleteJuejinBlog} from '../auto-blog/juejin/juejin'
+import { updateBlogFiles } from '../auto-blog/localBlog';
+import { juejinAddBlog, deleteJuejinBlog } from '../auto-blog/juejin/juejin';
 
 interface LoginParams {
   name: string;
@@ -23,14 +23,14 @@ interface RigisterParams {
 
 interface ApiData {
   code: number;
-  data: string;
+  data: string | object | null;
   msg: string;
 }
 
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
     type Page {
-      id: ID
+      blogId: String
       url: String
       content: String
       endTime: String
@@ -76,7 +76,7 @@ function initGraphQL(app: Koa): void {
     type Query {
       userInfo: User
       pageList(page: Int, limit: Int): Pages
-      pageDetail(id: String): Page
+      pageDetail(blogId: String): Page
       blogList: [Page]
     }
 
@@ -87,8 +87,9 @@ function initGraphQL(app: Koa): void {
       updatePage(_id: String, url: String): ApiData
       addPage(url: String, content: String): ApiData
       updateLocalBlog: ApiData
-      publishJuejinBlog(id: String): ApiData
-      deleteJuejinBlog(id: String, juejin_id: String): ApiData
+      publishJuejinBlog(blogId: String, content: String): ApiData
+      deleteJuejinBlog(blogId: String, juejin_id: String): ApiData
+      updateToLocal(blogId: String, content: String): ApiData
     }
 
     schema {
@@ -100,11 +101,11 @@ function initGraphQL(app: Koa): void {
   const resolvers = {
     Query: {
       pageList: async (_parent: never, args: any) => {
-        const result: boolean | page.Item[] =  await pageModel.query(args);
-        return result
+        const result: boolean | page.Item[] = await pageModel.query(args);
+        return result;
       },
       pageDetail: async (_parent: never, args: any) => {
-        const result: page.Item  = await pageModel.queryOne(args);
+        const result: page.Item = await pageModel.queryOne(args);
         return result;
       },
       userInfo: async (_parent: never, args: any): Promise<any> => {
@@ -174,20 +175,21 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       updateLocalBlog: async () => {
-        const result = await updateBlogFiles()
-        return result
+        const result = await updateBlogFiles();
+        return result;
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
-         const result = await juejinAddBlog(args)
-         await pageModel.updateBlog(result)
-         return result
+        const result = await juejinAddBlog(args);
+        await pageModel.updateBlog(result);
+        return result;
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {
-        const [err, result] = await deleteJuejinBlog({...args})
-        if (err) {
-          return err
-        } 
-          return result
+        const result = await deleteJuejinBlog({ ...args });
+        return result;
+      },
+      updateToLocal: async (_parent, args) => {
+        const [err, result] = await pageModel.updateToLocal({ ...args });
+        return result;
       }
     }
   };
