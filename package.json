@@ -2,7 +2,7 @@
   "name": "page-node",
   "version": "0.0.1",
   "description": "可视化配置后台后端nodejs",
-  "main": "index.js",
+  "main": "dist/app.js",
   "scripts": {
     "dev": "npm-run-all --parallel server:dev server:start",
     "server:start": "cross-env NODE_ENV=development supervisor -i ./dist/client/ -w ./dist/ ./dist/app.js",
@@ -16,15 +16,18 @@
     "test:unit": "cd ./__tests__/unit;check_file=`ls  | grep '.test.ts' |  tr -s '\n'`;jest --findRelatedTests $check_file",
     "test:e2e": "cd ./__tests__/e2e;check_file=`ls  | grep '.spec.ts' |  tr -s '   n'`;jest --findRelatedTests $check_file",
     "test:service": "cd ./__tests__/service;check_file=`ls  | grep '.spec.ts' |  tr -s '\n'`;jest --detectOpenHandles --findRelatedTests $check_file",
-    "test": "cross-env NODE_ENV=test jest --no-cache --colors --coverage --forceExit --detectOpenHandles",
+    "test": "cross-env NODE_ENV=test jest --passWithNoTests --no-cache --colors --coverage --forceExit --detectOpenHandles",
     "lint": "eslint --fix --ext tsx,ts src __tests__",
     "prettier": "prettier --write --check ./**/*.{ts,tsx,less}",
     "coverage": "codecov",
     "commit": "npx git-cz"
   },
+  "_moduleAliases": {
+    "@": "./dist"
+  },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run prettier",
+      "pre-commit": "echo \"test luo\" && npm run prettier",
       "pre-push": "eslint --fix --ext tsx,ts src __tests__"
     }
   },
@@ -45,6 +48,7 @@
     "apollo-server-koa": "^2.9.16",
     "async": "^3.1.1",
     "autoprefixer": "^9.7.3",
+    "axios": "^0.20.0",
     "bizcharts": "^3.5.6",
     "cheerio": "^1.0.0-rc.2",
     "cssnano": "^4.1.10",
@@ -112,6 +116,7 @@
     "babel-loader": "^8.0.6",
     "babel-plugin-import": "^1.13.0",
     "codecov": "^3.6.1",
+    "compressing": "^1.5.1",
     "cross-env": "^6.0.3",
     "css-loader": "^3.4.2",
     "eslint": "^6.8.0",
@@ -131,10 +136,12 @@
     "jest-fetch-mock": "^3.0.1",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
+    "module-alias": "^2.2.2",
     "npm-run-all": "^4.1.5",
     "postcss-loader": "^3.0.0",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.0",
+    "ssh2-sftp-client": "^5.3.1",
     "style-loader": "^1.1.2",
     "supervisor": "^0.12.0",
     "ts-jest": "^24.3.0",
