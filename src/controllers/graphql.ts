@@ -9,7 +9,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
-import { juejinAddBlog, deleteJuejinBlog } from '../auto-blog/juejin/juejin';
+import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
 
 interface LoginParams {
   name: string;
@@ -88,6 +88,7 @@ function initGraphQL(app: Koa): void {
       addPage(url: String, content: String): ApiData
       updateLocalBlog: ApiData
       publishJuejinBlog(blogId: String, content: String): ApiData
+      updateJuejinBlog(blogId: String, juejin_id: String): ApiData
       deleteJuejinBlog(blogId: String, juejin_id: String): ApiData
       updateToLocal(blogId: String, content: String): ApiData
     }
@@ -183,12 +184,17 @@ function initGraphQL(app: Koa): void {
         await pageModel.updateBlog(result);
         return result;
       },
+      updateJuejinBlog: async (_parent: never, args: any) => {
+        const result = await updateJuejin(args);
+        await pageModel.updateBlog(result);
+        return result;
+      },
       deleteJuejinBlog: async (_parent: never, args: any) => {
         const result = await deleteJuejinBlog({ ...args });
         return result;
       },
       updateToLocal: async (_parent, args) => {
-        const [err, result] = await pageModel.updateToLocal({ ...args });
+        const result = await pageModel.updateToLocal({ ...args });
         return result;
       }
     }

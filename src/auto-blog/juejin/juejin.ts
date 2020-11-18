@@ -10,6 +10,7 @@ import {
   deleteJuejinArticleApi
 } from '../api/juejin';
 import juejinModel from '../../models/juejinModel';
+import JuejinModel from '../../models/juejinModel';
 
 // 获取分类
 const getJuejinCategory = async () => {
@@ -62,12 +63,12 @@ const getJuejinTags = async () => {
 };
 
 // 更新草稿
-const postUpdateJuejinDraft = async ({ id, category_id, blogId, content } = {}) => {
+const postUpdateJuejinDraft = async ({ id, category_id, blogId } = {}) => {
   if (!id || !category_id) {
     console.warn(`check postUpdateJuejinDraft`);
     return;
   }
-  const { title } = await PageModel.queryOne({
+  const { title, content } = await PageModel.queryOne({
     // 从本地读取博客信息
     blogId
   });
@@ -86,6 +87,9 @@ const postUpdateJuejinDraft = async ({ id, category_id, blogId, content } = {}) 
       mark_content: content
     }
   };
+  console.log('====================================');
+  console.log(params);
+  console.log('====================================');
   const [err, data] = await postJuejinUpdateDraftApi(params);
   if (err) {
     console.log('postUpdateJuejinDraft error');
@@ -120,9 +124,9 @@ const getJuejinArticleList = async () => {
     console.log(err);
     return;
   }
-  // data.forEach(async item => {
-  //   await juejinModel.syncJuejinToLocal(item.article_info)
-  // })
+  data.forEach(async item => {
+    await juejinModel.syncJuejinToLocal(item.article_info)
+  })
   console.log('获取文章列表成功');
   // console.log(data);
 };
@@ -170,7 +174,7 @@ const juejinAddBlog = async ({ blogId, content }) => {
     category_id,
     id: createData.id,
     blogId,
-    content
+    // content
   });
   const [err, result] = await postJuejinPublish({
     id: createData.id
@@ -189,19 +193,23 @@ const juejinAddBlog = async ({ blogId, content }) => {
  * 更新单个掘金博客
  * @param param0
  */
-const updateJuejin = async ({ blogId, createData, content }) => {
-  const [, categoryData] = await getJuejinCategory();
-  const { category_id } = categoryData.find(
-    item => item.category.category_name === '前端'
-  );
+const updateJuejin = async ({ blogId, juejin_id, content }) => {
+  // const [, categoryData] = await getJuejinCategory();
+  // const { category_id } = categoryData.find(
+  //   item => item.category.category_name === '前端'
+  // );
+  await getJuejinArticleList()
+  const {draft_id, category_id} = await JuejinModel.queryOne({
+    juejin_id
+  })
   await postUpdateJuejinDraft({
     category_id,
-    id: createData.id,
+    id: draft_id,
     blogId,
-    content
+    // content
   });
   const [err, result] = await postJuejinPublish({
-    id: createData.id
+    id: draft_id
   });
   if (!err) {
     await juejinModel.syncJuejinToLocal({ ...result, blogId });

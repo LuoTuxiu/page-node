@@ -100,7 +100,18 @@ const PageModel = {
     return result;
   },
   async updateToLocal(params) {
+    console.log('====================================');
     console.log(params);
+    console.log('====================================');
+    await this.update({
+      blogId: params.blogId,
+    },
+    {
+      content: decodeURIComponent(params.content)
+    })
+    return {
+      code: 0
+    }
   }
 };
 

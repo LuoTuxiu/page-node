@@ -57,7 +57,12 @@ const JuejinModel = {
     const { juejin_id } = params;
     // await juejinCol.deleteOne({ id });
     console.log(`deleteLocalJuejin ${params.id} success`);
-  }
+  },
+  async queryOne(params: object): Promise<any> {
+    const { juejin_id } = params;
+    const result = await juejinCol.findOne({ article_id:juejin_id  });
+    return result;
+  },
 };
 
 export default JuejinModel;
