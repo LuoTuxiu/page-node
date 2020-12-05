@@ -80,17 +80,23 @@ function initGraphQL(app: Koa): void {
       blogList: [Page]
     }
 
+    input NewPage {
+      filepath: String
+      content: String
+    }
+
     type Mutation {
       login(name: String, passwd: String): UserParams
       logout: ApiData
       register(name: String, passwd: String): ApiData
-      updatePage(_id: String, url: String): ApiData
-      addPage(url: String, content: String): ApiData
+      addPage(input: NewPage): ApiData
       updateLocalBlog: ApiData
       publishJuejinBlog(blogId: String, content: String): ApiData
       updateJuejinBlog(blogId: String, juejin_id: String): ApiData
       deleteJuejinBlog(blogId: String, juejin_id: String): ApiData
-      updateToLocal(blogId: String, content: String): ApiData
+      updatePage(blogId: String, content: String): ApiData
+      addToLocal(filepath: String, content: String): ApiData
+      deletePage(blogId: String): ApiData
     }
 
     schema {
@@ -168,16 +174,20 @@ function initGraphQL(app: Koa): void {
         // return Promise.reject(new Error('register error'))
       },
       updatePage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.update({ _id: args.id }, args);
+        const result = await pageModel.update({ blogId: args.blogId }, args);
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.addBlog(args);
+        const result = await pageModel.addPage(args.input);
         return result;
       },
+      deletePage: async(_parent: never, args: any):Promies => {
+        const result = await pageModel.deletePage(args)
+        return result
+      },
       updateLocalBlog: async () => {
-        const result = await updateBlogFiles();
-        return result;
+        // const result = await updateBlogFiles();
+        // return result;
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
         const result = await juejinAddBlog(args);
@@ -193,10 +203,6 @@ function initGraphQL(app: Koa): void {
         const result = await deleteJuejinBlog({ ...args });
         return result;
       },
-      updateToLocal: async (_parent, args) => {
-        const result = await pageModel.updateToLocal({ ...args });
-        return result;
-      }
     }
   };
 

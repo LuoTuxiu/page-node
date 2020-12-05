@@ -10,6 +10,6 @@ export default {
   init(app: Koa): void {
     app.use(router.routes()).use(router.allowedMethods());
     initGraphQL(app);
-    getAllLocalBlog();
+    // getAllLocalBlog();
   }
 };

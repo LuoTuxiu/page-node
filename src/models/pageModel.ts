@@ -41,10 +41,16 @@ const PageModel = {
     const result = await PageCol.findOne({ blogId });
     return result;
   },
-  async update(query: object, data: object): Promise<page.Item> {
+  async update(query: object, params: object): Promise<page.Item> {
+    const newData = {content: decodeURIComponent(params.content)}
+    if (!params.blogId) {
+      const now = new Date().getTime()
+      newData = { ...newData, createTime: now,
+        updateTime: now}
+    }
     return (PageCol.findOneAndUpdate(
       query,
-      data,
+      newData,
       {
         upsert: true
       },
@@ -55,16 +61,8 @@ const PageModel = {
       }
     ) as unknown) as page.Item;
   },
-  async add(params: object): Promise<page.Item> {
-    const page = new PageCol(params);
-    const result = await page.save(function(error) {
-      if (error) {
-        console.log(error);
-      }
-    });
-    return result;
-  },
-  async addBlog(params: object, filePath: string) {
+  async addPage(input = {}) {
+    const {filePath, content} = input
     const md5 = crypto.createHash('md5');
     const blogId = md5.update(filePath).digest('hex');
     // todo 这里先不用判断是否最新，先直接插入数据
@@ -73,7 +71,7 @@ const PageModel = {
     //   return Promise.resolve(undefined);
     // }
     const newParams = {
-      ...params,
+      content,
       blogId,
       originPath: filePath,
       title: filePath
@@ -99,19 +97,34 @@ const PageModel = {
     );
     return result;
   },
-  async updateToLocal(params) {
+  async deletePage(params) {
+    console.log(params);
+    const result = await await PageCol.remove(params)
+    console.log(result);
+    return result
+  },
+  async updatePage(params) {
     console.log('====================================');
     console.log(params);
     console.log('====================================');
-    await this.update({
-      blogId: params.blogId,
-    },
-    {
-      content: decodeURIComponent(params.content)
-    })
-    return {
-      code: 0
+    if (params.blogId) {
+      await this.update({
+        blogId: params.blogId,
+      },
+      {
+        content: decodeURIComponent(params.content)
+      })
+    } else{
+      const now = new Date().getTime()
+      this.add({
+        content: decodeURIComponent(params.content),
+        createTime: now,
+        updateTime: now
+      })
     }
+      return {
+        code: 0
+      }
   }
 };
 

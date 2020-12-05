@@ -9,7 +9,7 @@ async function getAllLocalBlog(
   const list = handleFileFromDir(filePath);
   list.forEach(async item => {
     const fsStat = fs.statSync(item);
-    await pageModel.addBlog(
+    await pageModel.addPage(
       {
         content: fs.readFileSync(item, 'utf8'),
         updateTime: fsStat.mtimeMs, // 更新时间取文件的更新时间
