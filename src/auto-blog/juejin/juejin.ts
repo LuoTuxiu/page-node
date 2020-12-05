@@ -140,25 +140,20 @@ const deleteJuejinBlog = async ({ pageId, juejin_id }) => {
   console.log(err)
   console.log(result)
   console.log('====================================');
-  if (!err || err.err_no === 404) {
+  if (!err || err.err_no === 404 || err.err_no === 0) { // err_no = 0 代表成功
     console.log(`删除掘金在该行的记录`);
-    await PageModel.updateBlog({
+    await PageModel.updatePage({
       juejin_id: '',
       pageId
     });
+    return
     // await juejinModel.deleteLocalJuejin({ juejin_id });
-    return {
-      code: 200,
-      data: null,
-      msg: 'success'
-    }
   }
-  if (err) {
     console.warn('deleteJuejinBlog error')
     console.log(err);
     console.log(result);
-  }
-  return [err];
+    return [err];
+  
 };
 
 // 新建一篇掘金博客
@@ -182,7 +177,7 @@ const juejinAddBlog = async ({ pageId, content }) => {
   if (!err) {
     await juejinModel.syncJuejinToLocal({ ...result, pageId });
     return {
-      article_id: result.article_id,
+      juejin_id: result.article_id,
       pageId
     };
   }

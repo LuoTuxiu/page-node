@@ -193,12 +193,12 @@ function initGraphQL(app: Koa): void {
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
         const result = await juejinAddBlog(args);
-        await pageModel.updateBlog(result);
+        await pageModel.updatePage(result);
         return result;
       },
       updateJuejinBlog: async (_parent: never, args: any) => {
         const result = await updateJuejin(args);
-        await pageModel.updateBlog(result);
+        await pageModel.updatePage(result);
         return result;
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {

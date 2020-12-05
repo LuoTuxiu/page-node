@@ -16,7 +16,8 @@ interface AddPageType {
 }
 
 interface UpdatePageType extends AddPageType {
-  pageId: string // 博客id
+  pageId: string; // 博客id
+  juejin_id?: '',
 }
 
 const crypto = require('crypto');
@@ -80,7 +81,7 @@ const PageModel = {
     // }
     const now = new Date().getTime()
     const newParams = {
-      content,
+      content: decodeURIComponent(content),
       pageId,
       title,
       grouping,
@@ -97,7 +98,13 @@ const PageModel = {
       throw new Error('pageId required')
     }
     const now = new Date().getTime()
-    const newData = {...restParams, content: decodeURIComponent(params.content), updateTime: now}
+    let newData = {...restParams, updateTime: now}
+    if (params.content) {
+      newData = {...newData, content: decodeURIComponent(params.content)}
+    }
+    if (params.juejin_id) { // 发布掘金
+      newData = {...newData, juejin_updateTime: now}
+    }
     console.log(newData);
     return (PageCol.findOneAndUpdate(
       {pageId},
@@ -126,6 +133,7 @@ const PageModel = {
   //   return result;
   // },
   async deletePage(params: QueryPageDetailType) {
+    // 看是否有掘金博客，如有有，是否需要先删除掘金博客
     const result = await await PageCol.remove(params)
     return result
   },
