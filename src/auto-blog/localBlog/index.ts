@@ -4,9 +4,9 @@ import pageModel from '../../models/pageModel';
 import { uploadLocalFile } from './node-ftp';
 
 async function getAllLocalBlog(
-  filePath = '/Users/tuxiuluo/Documents/Learn-note/docs'
+  grouping = '/Users/tuxiuluo/Documents/Learn-note/docs'
 ) {
-  const list = handleFileFromDir(filePath);
+  const list = handleFileFromDir(grouping);
   list.forEach(async item => {
     const fsStat = fs.statSync(item);
     await pageModel.addPage(

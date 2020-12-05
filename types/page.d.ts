@@ -1,4 +1,4 @@
-declare namespace page {
+declare namespace Page {
   interface Item {
     _id: string;
     url: string;

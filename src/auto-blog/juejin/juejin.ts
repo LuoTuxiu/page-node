@@ -63,14 +63,14 @@ const getJuejinTags = async () => {
 };
 
 // 更新草稿
-const postUpdateJuejinDraft = async ({ id, category_id, blogId } = {}) => {
+const postUpdateJuejinDraft = async ({ id, category_id, pageId } = {}) => {
   if (!id || !category_id) {
     console.warn(`check postUpdateJuejinDraft`);
     return;
   }
   const { title, content } = await PageModel.queryOne({
     // 从本地读取博客信息
-    blogId
+    pageId
   });
   console.log(`开始打印读取的数据库信息`);
   const params = {
@@ -132,7 +132,7 @@ const getJuejinArticleList = async () => {
 };
 
 // 删除掘金博客
-const deleteJuejinBlog = async ({ blogId, juejin_id }) => {
+const deleteJuejinBlog = async ({ pageId, juejin_id }) => {
   const [err, result] = await deleteJuejinArticleApi({
     data: { article_id: juejin_id }
   });
@@ -144,7 +144,7 @@ const deleteJuejinBlog = async ({ blogId, juejin_id }) => {
     console.log(`删除掘金在该行的记录`);
     await PageModel.updateBlog({
       juejin_id: '',
-      blogId
+      pageId
     });
     // await juejinModel.deleteLocalJuejin({ juejin_id });
     return {
@@ -162,7 +162,7 @@ const deleteJuejinBlog = async ({ blogId, juejin_id }) => {
 };
 
 // 新建一篇掘金博客
-const juejinAddBlog = async ({ blogId, content }) => {
+const juejinAddBlog = async ({ pageId, content }) => {
   const [, categoryData] = await getJuejinCategory();
   const { category_id } = categoryData.find(
     item => item.category.category_name === '前端'
@@ -173,17 +173,17 @@ const juejinAddBlog = async ({ blogId, content }) => {
   await postUpdateJuejinDraft({
     category_id,
     id: createData.id,
-    blogId,
+    pageId,
     // content
   });
   const [err, result] = await postJuejinPublish({
     id: createData.id
   });
   if (!err) {
-    await juejinModel.syncJuejinToLocal({ ...result, blogId });
+    await juejinModel.syncJuejinToLocal({ ...result, pageId });
     return {
       article_id: result.article_id,
-      blogId
+      pageId
     };
   }
   // await getJuejinArticleList()
@@ -193,7 +193,7 @@ const juejinAddBlog = async ({ blogId, content }) => {
  * 更新单个掘金博客
  * @param param0
  */
-const updateJuejin = async ({ blogId, juejin_id, content }) => {
+const updateJuejin = async ({ pageId, juejin_id, content }) => {
   // const [, categoryData] = await getJuejinCategory();
   // const { category_id } = categoryData.find(
   //   item => item.category.category_name === '前端'
@@ -205,17 +205,17 @@ const updateJuejin = async ({ blogId, juejin_id, content }) => {
   await postUpdateJuejinDraft({
     category_id,
     id: draft_id,
-    blogId,
+    pageId,
     // content
   });
   const [err, result] = await postJuejinPublish({
     id: draft_id
   });
   if (!err) {
-    await juejinModel.syncJuejinToLocal({ ...result, blogId });
+    await juejinModel.syncJuejinToLocal({ ...result, pageId });
     return {
       article_id: result.article_id,
-      blogId
+      pageId
     };
   }
   // await getJuejinArticleList()

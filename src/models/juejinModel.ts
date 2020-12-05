@@ -34,7 +34,7 @@ const juejinSechema = new mogoose.Schema({
   verify_status: Number,
   audit_status: Number,
   mark_content: String,
-  blogId: String
+  pageId: String
 });
 
 const juejinCol = mogoose.model('juejin', juejinSechema);

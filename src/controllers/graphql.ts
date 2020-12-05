@@ -30,7 +30,8 @@ interface ApiData {
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
     type Page {
-      blogId: String
+      pageId: String
+      grouping: String
       url: String
       content: String
       endTime: String
@@ -76,13 +77,14 @@ function initGraphQL(app: Koa): void {
     type Query {
       userInfo: User
       pageList(page: Int, limit: Int): Pages
-      pageDetail(blogId: String): Page
+      pageDetail(pageId: String): Page
       blogList: [Page]
     }
 
     input NewPage {
-      filepath: String
+      grouping: String
       content: String
+      title: String
     }
 
     type Mutation {
@@ -91,12 +93,12 @@ function initGraphQL(app: Koa): void {
       register(name: String, passwd: String): ApiData
       addPage(input: NewPage): ApiData
       updateLocalBlog: ApiData
-      publishJuejinBlog(blogId: String, content: String): ApiData
-      updateJuejinBlog(blogId: String, juejin_id: String): ApiData
-      deleteJuejinBlog(blogId: String, juejin_id: String): ApiData
-      updatePage(blogId: String, content: String): ApiData
-      addToLocal(filepath: String, content: String): ApiData
-      deletePage(blogId: String): ApiData
+      publishJuejinBlog(pageId: String, content: String): ApiData
+      updateJuejinBlog(pageId: String, juejin_id: String): ApiData
+      deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
+      updatePage(pageId: String, content: String, title: String): ApiData
+      addToLocal(grouping: String, content: String): ApiData
+      deletePage(pageId: String): ApiData
     }
 
     schema {
@@ -174,7 +176,7 @@ function initGraphQL(app: Koa): void {
         // return Promise.reject(new Error('register error'))
       },
       updatePage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.update({ blogId: args.blogId }, args);
+        const result = await pageModel.updatePage(args);
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
