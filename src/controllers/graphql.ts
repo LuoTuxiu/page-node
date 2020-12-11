@@ -5,6 +5,7 @@ import {
   UserInputError
 } from 'apollo-server-koa';
 import * as Koa from 'koa';
+import { applyMiddleware } from 'graphql-middleware'
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import userModel from '../models/userModel';
@@ -114,8 +115,16 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       pageDetail: async (_parent: never, args: any) => {
-        const result: page.Item = await pageModel.queryOne(args);
-        return result;
+        console.log(`before queryOne`);
+        console.log(args);
+        const result = await pageModel.queryOne(args);
+        console.log(result);
+        if (!result) {
+          console.log(`进入报错`);
+          throw new ApolloError('user error', 10001);
+          throw new Error('get detail error')
+        }
+        return result
       },
       userInfo: async (_parent: never, args: any): Promise<any> => {
         const result: boolean | user.Info[] = userModel.query(args);
@@ -208,10 +217,31 @@ function initGraphQL(app: Koa): void {
     }
   };
 
+  const beepMiddleware = {
+    Query: {
+      pageDetail: async (resolve, parent, args, context, info) => {
+        console.log(`here`);
+        // You can use middleware to override arguments
+        const argsWithDefault = { name: 'Bob', ...args }
+        const result = await resolve(parent, argsWithDefault, context, info)
+        console.log(`after resolve`);
+        console.log(result);
+        // Or change the returned values of resolvers
+        return result
+        // return result.replace(/Trump/g, 'beep')
+        // return {error: 222}
+      },
+    },
+  }
+
   const myGraphQLSchema = makeExecutableSchema({
     typeDefs,
     resolvers
   });
+  const schemaWithMiddleware = applyMiddleware(
+    myGraphQLSchema,
+    beepMiddleware,
+  )
   const server = new ApolloServer({ schema: myGraphQLSchema });
   server.applyMiddleware({ app });
 }

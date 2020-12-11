@@ -1,0 +1,34 @@
+{
+  "errors": [
+    {
+      "message": "Cannot read property 'replace' of null",
+      "locations": [
+        {
+          "line": 2,
+          "column": 3
+        }
+      ],
+      "path": [
+        "pageDetail"
+      ],
+      "extensions": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "exception": {
+          "stacktrace": [
+            "TypeError: Cannot read property 'replace' of null",
+            "    at _callee14$ (/Users/tuxiuluo/Documents/code/page-node/dist/controllers/graphql.js:513:61)",
+            "    at tryCatch (/Users/tuxiuluo/Documents/code/page-node/node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js:45:40)",
+            "    at Generator.invoke [as _invoke] (/Users/tuxiuluo/Documents/code/page-node/node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js:271:22)",
+            "    at Generator.prototype.<computed> [as next] (/Users/tuxiuluo/Documents/code/page-node/node_modules/@babel/runtime/node_modules/regenerator-runtime/runtime.js:97:21)",
+            "    at asyncGeneratorStep (/Users/tuxiuluo/Documents/code/page-node/node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:24)",
+            "    at _next (/Users/tuxiuluo/Documents/code/page-node/node_modules/@babel/runtime/helpers/asyncToGenerator.js:25:9)",
+            "    at processTicksAndRejections (internal/process/task_queues.js:93:5)"
+          ]
+        }
+      }
+    }
+  ],
+  "data": {
+    "pageDetail": null
+  }
+}
