@@ -4,12 +4,12 @@ import pageModel from '../../models/pageModel';
 import { uploadLocalFile } from './node-ftp';
 
 async function getAllLocalBlog(
-  filePath = '/Users/tuxiuluo/Documents/Learn-note/docs'
+  grouping = '/Users/tuxiuluo/Documents/Learn-note/docs'
 ) {
-  const list = handleFileFromDir(filePath);
+  const list = handleFileFromDir(grouping);
   list.forEach(async item => {
     const fsStat = fs.statSync(item);
-    await pageModel.addBlog(
+    await pageModel.addPage(
       {
         content: fs.readFileSync(item, 'utf8'),
         updateTime: fsStat.mtimeMs, // 更新时间取文件的更新时间

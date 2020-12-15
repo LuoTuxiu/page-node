@@ -1,5 +1,4 @@
 import Koa from 'koa';
-import log4js from 'log4js';
 import koaBody from 'koa-body';
 import 'module-alias/register'
 
@@ -9,6 +8,8 @@ import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
 
+// const pino = require('koa-pino-logger')({ prettyPrint: true})
+
 const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
 
 global.CONFIG = CONFIG
@@ -16,28 +17,14 @@ global.CONFIG = CONFIG
 const app = new Koa();
 app.use(koaBody());
 
-// 错误日志记录
-log4js.configure({
-  appenders: {
-    globallog: {
-      type: 'file',
-      filename: './logs/globallog.log'
-    }
-  },
-  categories: {
-    default: {
-      appenders: ['globallog'],
-      level: 'debug'
-    }
-  }
-});
-const logger = log4js.getLogger('globallog');
-
-ErrorHander.init(app, logger);
+// ErrorHander.init(app, logger);
 AnalysicsHander.init(app);
 headerHandle.init(app);
+// app.use(pino)
 // 初始化路由
 controller.init(app);
+
+
 // // 静态资源目录
 // app.use(serve('client'));
 
@@ -45,9 +32,9 @@ controller.init(app);
 console.log(`server is running at : http://localhost:${config.serverPort}`);
 
 // 全局异常捕获
-process.on('uncaughtException', err => {
-  logger.error(JSON.stringify(err));
-});
+// process.on('uncaughtException', err => {
+//   logger.error(JSON.stringify(err));
+// });
 
 // 导出给 jest 测试
 module.exports = app.listen(config.serverPort);
