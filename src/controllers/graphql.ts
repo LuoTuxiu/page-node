@@ -234,9 +234,17 @@ function initGraphQL(app: Koa): void {
     },
   }
 
+  // const logInput = async (resolve, root, args, context, info) => {
+  //   console.log(`1. logInput: ${JSON.stringify(args)}`)
+  //   const result = await resolve(root, args, context, info)
+  //   console.log(`5. logInput`)
+  //   return result
+  // }
+
   const myGraphQLSchema = makeExecutableSchema({
     typeDefs,
-    resolvers
+    resolvers,
+    // middlewares: [logInput],
   });
   const schemaWithMiddleware = applyMiddleware(
     myGraphQLSchema,

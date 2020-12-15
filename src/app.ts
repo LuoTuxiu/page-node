@@ -8,7 +8,7 @@ import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
 
-const pino = require('koa-pino-logger')({ prettyPrint: true})
+// const pino = require('koa-pino-logger')({ prettyPrint: true})
 
 const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
 
@@ -20,7 +20,7 @@ app.use(koaBody());
 // ErrorHander.init(app, logger);
 AnalysicsHander.init(app);
 headerHandle.init(app);
-app.use(pino)
+// app.use(pino)
 // 初始化路由
 controller.init(app);
 

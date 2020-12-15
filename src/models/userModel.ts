@@ -36,8 +36,6 @@ const UserModel = {
     return result;
   },
   async query(params: object): Promise<user.Info[]> {
-    console.log(params);
-    console.log('进到query');
     return (UserCol.find(params, error => {
       if (error) {
         console.log('some error happen');
