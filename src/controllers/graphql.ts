@@ -8,6 +8,7 @@ import * as Koa from 'koa';
 import { applyMiddleware } from 'graphql-middleware'
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
+import CategoryModel from '../models/categoryModel'
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
 import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
@@ -46,9 +47,21 @@ function initGraphQL(app: Koa): void {
       juejin_id: String
     }
 
+    type Category {
+      updateTime: String
+      createTime: String
+      category_name: String
+      category_id: String
+    }
+
     type Pages {
       total: Int
       list: [Page]
+    }
+
+    type Categorys {
+      total: Int
+      list: [Category]
     }
 
     type User {
@@ -78,6 +91,7 @@ function initGraphQL(app: Koa): void {
     type Query {
       userInfo: User
       pageList(page: Int, limit: Int): Pages
+      categoryList(page: Int, limit: Int): Categorys
       pageDetail(pageId: String): Page
       blogList: [Page]
     }
@@ -88,11 +102,18 @@ function initGraphQL(app: Koa): void {
       title: String
     }
 
+    input NewCategory {
+      category_name: String
+    }
+
     type Mutation {
       login(name: String, passwd: String): UserParams
       logout: ApiData
       register(name: String, passwd: String): ApiData
       addPage(input: NewPage): ApiData
+      addCategory(input: NewCategory): ApiData
+      deleteCategory(category_id: String): ApiData
+      updateCategory(category_id: String, category_name: String): ApiData
       updateLocalBlog: ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
@@ -114,11 +135,12 @@ function initGraphQL(app: Koa): void {
         const result: boolean | page.Item[] = await pageModel.query(args);
         return result;
       },
+      categoryList: async (_parent: never, args: any) => {
+        const result: boolean | page.CategoryItem[] = await CategoryModel.query(args);
+        return result;
+      },
       pageDetail: async (_parent: never, args: any) => {
-        console.log(`before queryOne`);
-        console.log(args);
         const result = await pageModel.queryOne(args);
-        console.log(result);
         if (!result) {
           console.log(`进入报错`);
           throw new ApolloError('user error', 10001);
@@ -212,6 +234,18 @@ function initGraphQL(app: Koa): void {
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {
         const result = await deleteJuejinBlog({ ...args });
+        return result;
+      },
+      addCategory: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.addCategory(args.input);
+        return result;
+      },
+      deleteCategory: async(_parent: never, args: any):Promies => {
+        const result = await CategoryModel.deleteCategory(args)
+        return result
+      },
+      updateCategory: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.updateCategory(args);
         return result;
       },
     }

@@ -10,4 +10,11 @@ declare namespace Page {
     description: string;
     keyword: string;
   }
+
+  interface CategoryItem {
+    _id: string;
+    updateTime: number;
+    createTime: number;
+    category_name: string
+  }
 }
