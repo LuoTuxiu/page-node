@@ -27,7 +27,7 @@ const mogoose = DbHelper.connect();
 const pageSechema = new mogoose.Schema({
   url: String,
   content: {
-    required: true,
+    // required: true,
     type: String
   },
   endTime: Number,
