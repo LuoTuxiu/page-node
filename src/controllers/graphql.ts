@@ -31,9 +31,16 @@ interface ApiData {
 
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
+    type Category {
+      updateTime: String
+      createTime: String
+      category_name: String
+      category_id: String
+    }
+
     type Page {
       pageId: String
-      grouping: String
+      category: Category
       url: String
       content: String
       endTime: String
@@ -43,15 +50,7 @@ function initGraphQL(app: Koa): void {
       description: String
       keyword: String
       originPath: String
-      category: [String]
       juejin_id: String
-    }
-
-    type Category {
-      updateTime: String
-      createTime: String
-      category_name: String
-      category_id: String
     }
 
     type Pages {
@@ -92,12 +91,13 @@ function initGraphQL(app: Koa): void {
       userInfo: User
       pageList(page: Int, limit: Int): Pages
       categoryList(page: Int, limit: Int): Categorys
+      categoryAll: Categorys
       pageDetail(pageId: String): Page
       blogList: [Page]
     }
 
     input NewPage {
-      grouping: String
+      category_id: String
       content: String
       title: String
     }
@@ -118,8 +118,8 @@ function initGraphQL(app: Koa): void {
       publishJuejinBlog(pageId: String, content: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
       deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
-      updatePage(pageId: String, content: String, title: String): ApiData
-      addToLocal(grouping: String, content: String): ApiData
+      updatePage(pageId: String, content: String, title: String, category_id: String): ApiData
+      addToLocal(category_id: String, content: String): ApiData
       deletePage(pageId: String): ApiData
     }
 
@@ -137,6 +137,10 @@ function initGraphQL(app: Koa): void {
       },
       categoryList: async (_parent: never, args: any) => {
         const result: boolean | page.CategoryItem[] = await CategoryModel.query(args);
+        return result;
+      },
+      categoryAll: async (_parent: never, args: any) => {
+        const result: boolean | page.CategoryItem[] = await CategoryModel.queryAll(args);
         return result;
       },
       pageDetail: async (_parent: never, args: any) => {
@@ -254,12 +258,9 @@ function initGraphQL(app: Koa): void {
   const beepMiddleware = {
     Query: {
       pageDetail: async (resolve, parent, args, context, info) => {
-        console.log(`here`);
         // You can use middleware to override arguments
         const argsWithDefault = { name: 'Bob', ...args }
         const result = await resolve(parent, argsWithDefault, context, info)
-        console.log(`after resolve`);
-        console.log(result);
         // Or change the returned values of resolvers
         return result
         // return result.replace(/Trump/g, 'beep')

@@ -48,6 +48,18 @@ const CategoryModel = {
       list
     };
   },
+  async queryAll(params: QueryCategoryType): Promise<any> {
+    const { ...args } = params;
+		const findList = await CategoryCol.find(args, null, { sort: { updateTime: -1 } })
+    const list = findList.map(item => {
+			item.category_id = item._id
+			return item
+		});
+    return {
+      total: CategoryCol.estimatedDocumentCount(),
+      list
+    };
+  },
   async queryOne(params: QueryCategoryDetailType): Promise<any> {
     const { category_id } = params;
     const result = await CategoryCol.findOne({ category_id });

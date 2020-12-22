@@ -10,7 +10,7 @@ interface QueryPageDetailType {
 }
 
 interface AddPageType {
-  grouping: string; // 分组
+  category_id: string; // 分组
   content: string;
   title: string,
 }
@@ -39,13 +39,13 @@ const pageSechema = new mogoose.Schema({
   },
   description: String,
   keyword: String,
-  grouping: {
+  category: {
     required: true,
-    type: String
+    type: 'ObjectId',
+    ref: 'categorys'
   },
   pageId: String, // 博客id
   originPath: String, // 原始路径
-  category: [String],
   juejin_id: String, // 掘金对应的id
   juejin_updateTime: Number
   // _id: String
@@ -57,7 +57,7 @@ const PageModel = {
   async query(params: QueryPageType): Promise<any> {
     const { page = 1, limit = 10, ...args } = params;
     const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
-    const list = ((await PageCol.find(args, null, { sort: { updateTime: -1 } })
+    const list = ((await PageCol.find(args, null, { sort: { updateTime: -1 } }).populate('category')
       .skip(offset)
       .limit(limit)) as unknown) as Page.Item[];
     return {
@@ -67,45 +67,44 @@ const PageModel = {
   },
   async queryOne(params: QueryPageDetailType): Promise<any> {
     const { pageId } = params;
-    const result = await PageCol.findOne({ pageId });
+    const result = await PageCol.findOne({ pageId }).populate('category');
     return result;
   },
   async addPage(params: AddPageType) {
-    const {grouping, content, title} = params
+    const {category_id, content, title} = params
     const md5 = crypto.createHash('md5');
-    const pageId = md5.update(`${grouping}\\${title}`).digest('hex');
+    const pageId = md5.update(`${category_id}\\${title}`).digest('hex');
     // todo 这里先不用判断是否最新，先直接插入数据
     // const isNew = !(await PageCol.exists({ pageId }));
     // if (!isNew) {
     //   return Promise.resolve(undefined);
     // }
+    console.log(`category_id is ${category_id}`);
     const now = new Date().getTime()
     const newParams = {
       content: decodeURIComponent(content),
       pageId,
       title,
-      grouping,
+      category: category_id,
       updateTime: now,
       createTime: now
     };
     const result = await PageCol.create(newParams);
-    console.log(result);
     return result;
   },
   async updatePage(params: UpdatePageType): Promise<Page.Item> {
-    const { pageId, ...restParams } = params
+    const { pageId, category_id, ...restParams } = params
     if (!pageId) {
       throw new Error('pageId required')
     }
     const now = new Date().getTime()
-    let newData = {...restParams, updateTime: now}
+    let newData = {...restParams,   category: category_id, updateTime: now}
     if (params.content) {
       newData = {...newData, content: decodeURIComponent(params.content)}
     }
     if (params.juejin_id) { // 发布掘金
       newData = {...newData, juejin_updateTime: now}
     }
-    console.log(newData);
     return (PageCol.findOneAndUpdate(
       {pageId},
       newData,

@@ -4,9 +4,9 @@ import pageModel from '../../models/pageModel';
 import { uploadLocalFile } from './node-ftp';
 
 async function getAllLocalBlog(
-  grouping = '/Users/tuxiuluo/Documents/Learn-note/docs'
+  category_id = '/Users/tuxiuluo/Documents/Learn-note/docs'
 ) {
-  const list = handleFileFromDir(grouping);
+  const list = handleFileFromDir(category_id);
   list.forEach(async item => {
     const fsStat = fs.statSync(item);
     const titleList = item.replace('.md', '').split('/')
@@ -16,7 +16,7 @@ async function getAllLocalBlog(
         {
           content,
           title: titleList[titleList.length - 1],
-          grouping: '前端',
+          category_id: '前端',
           updateTime: fsStat.mtimeMs, // 更新时间取文件的更新时间
           createTime: fsStat.birthtimeMs // 创建时间取文件的创建时间
         },
