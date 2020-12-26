@@ -11,6 +11,7 @@ import pageModel from '../models/pageModel';
 import CategoryModel from '../models/categoryModel'
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
+import {jianshuAddBlog} from '../auto-blog/jianshu/jianshu'
 import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
 
 interface LoginParams {
@@ -112,10 +113,12 @@ function initGraphQL(app: Koa): void {
       register(name: String, passwd: String): ApiData
       addPage(input: NewPage): ApiData
       addCategory(input: NewCategory): ApiData
+      addCategoryJianshu(input: NewCategory): ApiData
       deleteCategory(category_id: String): ApiData
       updateCategory(category_id: String, category_name: String): ApiData
       updateLocalBlog: ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
+      publishJianshuBlog(pageId: String, content: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
       deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
       updatePage(pageId: String, content: String, title: String, category_id: String): ApiData
@@ -240,6 +243,15 @@ function initGraphQL(app: Koa): void {
         const result = await deleteJuejinBlog({ ...args });
         return result;
       },
+      publishJianshuBlog: async (_parent: never, args: any) => {
+        const [err, data] = await jianshuAddBlog(args);
+        if(!err) {
+          await pageModel.updatePage(data);
+        } else {
+          throw new ApolloError(err.message, err.code)
+          // throw err
+        }
+      },
       addCategory: async (_parent: never, args: any): Promise => {
         const result = await CategoryModel.addCategory(args.input);
         return result;
@@ -250,6 +262,10 @@ function initGraphQL(app: Koa): void {
       },
       updateCategory: async (_parent: never, args: any): Promise => {
         const result = await CategoryModel.updateCategory(args);
+        return result;
+      },
+      addCategoryJianshu: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.addCategoryJianshu(args.input);
         return result;
       },
     }

@@ -18,6 +18,7 @@ interface AddPageType {
 interface UpdatePageType extends AddPageType {
   pageId: string; // 博客id
   juejin_id?: '',
+  jianshu_id?: ''
 }
 
 const crypto = require('crypto');
@@ -47,7 +48,9 @@ const pageSechema = new mogoose.Schema({
   pageId: String, // 博客id
   originPath: String, // 原始路径
   juejin_id: String, // 掘金对应的id
-  juejin_updateTime: Number
+  juejin_updateTime: Number,
+  jianshu_id: String, // 简书对应的id
+  jianshu_updateTime: Number
   // _id: String
 });
 
@@ -104,6 +107,9 @@ const PageModel = {
     }
     if (params.juejin_id) { // 发布掘金
       newData = {...newData, juejin_updateTime: now}
+    }
+    if (params.jianshu_id) { // 发布简书
+      newData = {...newData, jianshu_updateTime: now}
     }
     return (PageCol.findOneAndUpdate(
       {pageId},

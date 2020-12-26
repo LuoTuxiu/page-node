@@ -13,6 +13,11 @@ interface AddCategoryType {
   category_name: string; // 分类名称
 }
 
+interface AddCategoryJianshuType {
+  category_id_jianshu: string;
+  category_id: string; // 分类id
+}
+
 interface UpdateCategoryType extends AddCategoryType {
   category_id: string; // 分类id
 }
@@ -28,7 +33,11 @@ const mogoose = DbHelper.connect();
 const categorySechema = new mogoose.Schema({
   updateTime: Number,
   createTime: Number,
-	category_name: String,
+  category_name: {
+    type: String,
+    require: true,
+  },
+  category_id_jianshu: String
 });
 
 const CategoryCol = mogoose.model('categorys', categorySechema);
@@ -80,6 +89,26 @@ const CategoryModel = {
     };
     const result = await CategoryCol.create(newParams);
     return result;
+  },
+  async addCategoryJianshu(params: AddCategoryJianshuType): Promise<Category.Item> {
+    const { category_id, ...restParams } = params
+    if (!category_id) {
+      throw new Error('category_id required')
+    }
+    const now = new Date().getTime()
+    const newData = {...restParams, updateTime: now}
+    return (CategoryCol.findOneAndUpdate(
+      {_id: category_id},
+      newData,
+      {
+        upsert: true
+      },
+      (error) => {
+        if (error) {
+          throw error
+        }
+      }
+    ) as unknown) as Category.Item;
   },
   async updateCategory(params: UpdateCategoryType): Promise<Category.Item> {
     const { category_id, ...restParams } = params
