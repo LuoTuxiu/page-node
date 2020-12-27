@@ -1,12 +1,14 @@
 import Koa from 'koa';
 import koaBody from 'koa-body';
 import 'module-alias/register'
+import graceful from 'graceful'
 
-import ErrorHander from '@/middleware/ErrorHander';
+// import ErrorHander from '@/middleware/ErrorHander';
 import AnalysicsHander from '@/middleware/AnalysicsHander';
 import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
+
 
 // const pino = require('koa-pino-logger')({ prettyPrint: true})
 
@@ -37,4 +39,12 @@ console.log(`server is running at : http://localhost:${config.serverPort}`);
 // });
 
 // 导出给 jest 测试
-module.exports = app.listen(config.serverPort);
+const server = app.listen(config.serverPort);
+graceful({
+	servers: [server],
+	error: (error) => {
+		console.log(`捕获到未捕获异常`);
+		console.log(error);
+	}
+})
+module.exports = server

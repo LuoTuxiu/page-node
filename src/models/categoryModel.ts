@@ -71,7 +71,7 @@ const CategoryModel = {
   },
   async queryOne(params: QueryCategoryDetailType): Promise<any> {
     const { category_id } = params;
-    const result = await CategoryCol.findOne({ category_id });
+    const result = await CategoryCol.findOne({ _id: category_id });
     return result;
   },
   async addCategory(params: AddCategoryType) {

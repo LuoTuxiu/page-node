@@ -3,6 +3,7 @@ import DbHelper from '../utils/dbHelper';
 interface QueryPageType {
   page: number;
   limit: number;
+  keyword: string;
 }
 
 interface QueryPageDetailType {
@@ -58,13 +59,27 @@ const PageCol = mogoose.model('pages', pageSechema);
 
 const PageModel = {
   async query(params: QueryPageType): Promise<any> {
-    const { page = 1, limit = 10, ...args } = params;
+    const { page = 1, limit = 10, keyword } = params;
+    const reg = new RegExp(keyword || '', 'i') // i 代表不区分大小写
     const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
-    const list = ((await PageCol.find(args, null, { sort: { updateTime: -1 } }).populate('category')
-      .skip(offset)
-      .limit(limit)) as unknown) as Page.Item[];
+    const findQuery = [{
+      $or: [
+        {
+          content: {
+            $regex: reg
+          }
+        },
+        {
+          title: {
+            $regex: reg
+          },
+        }
+      ]
+    }, null, { sort: { updateTime: -1 } }]
+    const all = await PageCol.find(...findQuery).populate('category')
+    const list = await PageCol.find(...findQuery).populate('category').skip(offset).limit(limit)
     return {
-      total: PageCol.estimatedDocumentCount(),
+      total: all.length,
       list
     };
   },

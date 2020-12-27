@@ -37,6 +37,7 @@ function initGraphQL(app: Koa): void {
       createTime: String
       category_name: String
       category_id: String
+      _id: String
     }
 
     type Page {
@@ -52,6 +53,9 @@ function initGraphQL(app: Koa): void {
       keyword: String
       originPath: String
       juejin_id: String
+      jianshu_id: String
+      juejin_updateTime: String
+      jianshu_updateTime: String
     }
 
     type Pages {
@@ -90,7 +94,7 @@ function initGraphQL(app: Koa): void {
 
     type Query {
       userInfo: User
-      pageList(page: Int, limit: Int): Pages
+      pageList(page: Int, limit: Int, keyword: String): Pages
       categoryList(page: Int, limit: Int): Categorys
       categoryAll: Categorys
       pageDetail(pageId: String): Page
