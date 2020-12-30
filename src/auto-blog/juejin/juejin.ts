@@ -160,7 +160,7 @@ const deleteJuejinBlog = async ({ pageId, juejin_id }) => {
 const juejinAddBlog = async ({ pageId, content }) => {
   const [, categoryData] = await getJuejinCategory();
   const { category_id } = categoryData.find(
-    item => item.category.category_name === '前端'
+    item => item.category.category_name === '前端' // todo 写死“前端”
   );
   const [, createData] = await postJuejinCreateDraft({
     category_id

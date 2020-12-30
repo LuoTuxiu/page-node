@@ -8,9 +8,12 @@ import * as Koa from 'koa';
 import { applyMiddleware } from 'graphql-middleware'
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
+import CategoryModel from '../models/categoryModel'
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
+import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList } from '../auto-blog/jianshu/jianshu'
 import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
+
 
 interface LoginParams {
   name: string;
@@ -30,9 +33,17 @@ interface ApiData {
 
 function initGraphQL(app: Koa): void {
   const typeDefs = gql`
+    type Category {
+      updateTime: String
+      createTime: String
+      category_name: String
+      category_id: String
+      _id: String
+    }
+
     type Page {
       pageId: String
-      grouping: String
+      category: Category
       url: String
       content: String
       endTime: String
@@ -42,13 +53,42 @@ function initGraphQL(app: Koa): void {
       description: String
       keyword: String
       originPath: String
-      category: [String]
       juejin_id: String
+      jianshu_id: String
+      juejin_updateTime: String
+      jianshu_updateTime: String
+    }
+
+    type JianshuPage {
+      autosave_control: Int
+      content_updated_at: Int
+      id: Int
+      in_book: Boolean
+      is_top: Boolean
+      last_compiled_at: Int
+      note_type: Int
+      notebook_id: Int
+      paid: Boolean
+      reprintable: Boolean
+      schedule_publish_at: String
+      seq_in_nb: Int
+      shared: Boolean
+      slug: String
+      title: String
     }
 
     type Pages {
       total: Int
       list: [Page]
+    }
+
+    type JianshuPages {
+      list: [JianshuPage]
+    }
+
+    type Categorys {
+      total: Int
+      list: [Category]
     }
 
     type User {
@@ -77,15 +117,22 @@ function initGraphQL(app: Koa): void {
 
     type Query {
       userInfo: User
-      pageList(page: Int, limit: Int): Pages
+      pageList(page: Int, limit: Int, keyword: String): Pages
+      categoryList(page: Int, limit: Int): Categorys
+      categoryAll: Categorys
       pageDetail(pageId: String): Page
       blogList: [Page]
+      jianshuList: JianshuPages
     }
 
     input NewPage {
-      grouping: String
+      category_id: String
       content: String
       title: String
+    }
+
+    input NewCategory {
+      category_name: String
     }
 
     type Mutation {
@@ -93,12 +140,18 @@ function initGraphQL(app: Koa): void {
       logout: ApiData
       register(name: String, passwd: String): ApiData
       addPage(input: NewPage): ApiData
+      addCategory(input: NewCategory): ApiData
+      addCategoryJianshu(input: NewCategory): ApiData
+      deleteCategory(category_id: String): ApiData
+      updateCategory(category_id: String, category_name: String): ApiData
       updateLocalBlog: ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
+      publishJianshuBlog(pageId: String, content: String): ApiData
+      deleteJianshuBlog(pageId: String, jianshu_id: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
       deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
-      updatePage(pageId: String, content: String, title: String): ApiData
-      addToLocal(grouping: String, content: String): ApiData
+      updatePage(pageId: String, content: String, title: String, category_id: String): ApiData
+      addToLocal(category_id: String, content: String): ApiData
       deletePage(pageId: String): ApiData
     }
 
@@ -114,11 +167,20 @@ function initGraphQL(app: Koa): void {
         const result: boolean | page.Item[] = await pageModel.query(args);
         return result;
       },
+      jianshuList: async (_parent: never, args: any) => {
+        const result: boolean | page.Item[] = await getJianshuArticleList(args);
+        return result;
+      },
+      categoryList: async (_parent: never, args: any) => {
+        const result: boolean | page.CategoryItem[] = await CategoryModel.query(args);
+        return result;
+      },
+      categoryAll: async (_parent: never, args: any) => {
+        const result: boolean | page.CategoryItem[] = await CategoryModel.queryAll(args);
+        return result;
+      },
       pageDetail: async (_parent: never, args: any) => {
-        console.log(`before queryOne`);
-        console.log(args);
         const result = await pageModel.queryOne(args);
-        console.log(result);
         if (!result) {
           console.log(`进入报错`);
           throw new ApolloError('user error', 10001);
@@ -214,18 +276,44 @@ function initGraphQL(app: Koa): void {
         const result = await deleteJuejinBlog({ ...args });
         return result;
       },
+      publishJianshuBlog: async (_parent: never, args: any) => {
+        const [err, data] = await jianshuAddBlog(args);
+        if(!err) {
+          await pageModel.updatePage(data);
+        } else {
+          throw new ApolloError(err.message, err.code)
+          // throw err
+        }
+      },
+      deleteJianshuBlog: async (_parent: never, args: any) => {
+        const result = await deleteJianshuBlog({ ...args });
+        return result;
+      },
+      addCategory: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.addCategory(args.input);
+        return result;
+      },
+      deleteCategory: async(_parent: never, args: any):Promies => {
+        const result = await CategoryModel.deleteCategory(args)
+        return result
+      },
+      updateCategory: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.updateCategory(args);
+        return result;
+      },
+      addCategoryJianshu: async (_parent: never, args: any): Promise => {
+        const result = await CategoryModel.addCategoryJianshu(args.input);
+        return result;
+      },
     }
   };
 
   const beepMiddleware = {
     Query: {
       pageDetail: async (resolve, parent, args, context, info) => {
-        console.log(`here`);
         // You can use middleware to override arguments
         const argsWithDefault = { name: 'Bob', ...args }
         const result = await resolve(parent, argsWithDefault, context, info)
-        console.log(`after resolve`);
-        console.log(result);
         // Or change the returned values of resolvers
         return result
         // return result.replace(/Trump/g, 'beep')
