@@ -94,7 +94,8 @@ const postJianshuPublish = async ({ id }) => {
 // 获取文章列表
 const getJianshuArticleList = async () => {
   const params = {
-    data: { user_id: '2752832846174765', sort_type: 2, cursor: '0' }
+    notebook_id: '48973545'
+    // data: { user_id: '2752832846174765', sort_type: 2, cursor: '0' }
   };
   const [err, data] = await getJianshuArticleListApi(params);
   if (err) {
@@ -102,17 +103,19 @@ const getJianshuArticleList = async () => {
     console.log(err);
     return;
   }
-  data.forEach(async item => {
-    await jianshuModel.syncJianshuToLocal(item.article_info)
-  })
   console.log('获取文章列表成功');
+  // console.log(data);
+  return {list: data}
+  // data.forEach(async item => {
+  //   await jianshuModel.syncJianshuToLocal(item.article_info)
+  // })
   // console.log(data);
 };
 
 // 删除简书博客
 const deleteJianshuBlog = async ({ pageId, jianshu_id }) => {
   const [err, result] = await deleteJianshuArticleApi({
-    data: { article_id: jianshu_id }
+    blogId: jianshu_id
   });
   console.log('====================================');
   console.log(err)
@@ -167,7 +170,7 @@ const jianshuAddBlog = async ({ pageId }) => {
       pageId
     }];
 	} 
-	console.log(`失败更新博客${id}`);
+  console.log(`失败更新博客${id}，原因是简书端报错: ${err.message}`);
 	return [err]
 };
 
@@ -211,5 +214,6 @@ export {
   postJianshuPublish,
   jianshuAddBlog,
   deleteJianshuBlog,
-  updateJianshu
+  updateJianshu,
+  getJianshuArticleList
 };

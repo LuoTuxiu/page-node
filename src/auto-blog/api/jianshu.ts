@@ -67,7 +67,7 @@ export const postJianshuPublishApi = async (params = {}) => {
 // 获取简书文章列表
 export const getJianshuArticleListApi = async (params = {
 }) => {
-  const url = `/author/notebooks/${params.blogId}/notes`;
+  const url = `/author/notebooks/${params.notebook_id}/notes`;
   const data = await request({
     url,
     baseURL: URL_JIANSHU,
@@ -75,15 +75,14 @@ export const getJianshuArticleListApi = async (params = {
   return judgeApi(data)
 };
 
-// // 删除简书文章
-// export const deleteJianshuArticleApi = async (params = {
-// }) => {
-//   const url = '/content_api/v1/article/delete';
-//   const data = await request({
-//     url,
-//     baseURL: URL_JIANSHU,
-//     method: 'POST',
-//     ...params
-//   });
-//   return judgeApi(data)
-// };
+// 删除简书文章
+export const deleteJianshuArticleApi = async (params = {
+}) => {
+  const url = `author/notes/${params.blogId}/soft_destroy`;
+  const data = await request({
+    url,
+    baseURL: URL_JIANSHU,
+    method: 'POST',
+  });
+  return judgeApi(data)
+};
