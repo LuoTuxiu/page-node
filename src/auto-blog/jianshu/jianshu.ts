@@ -35,7 +35,7 @@ const postJianshuCreateDraft = async originParams => {
     console.log(err);
     return;
   }
-  return Promise.resolve([err, data]);
+  return [err, data];
 };
 
 const getJianshuTags = async () => {
