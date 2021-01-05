@@ -116,7 +116,10 @@ const PageModel = {
       throw new Error('pageId required')
     }
     const now = new Date().getTime()
-    let newData = {...restParams,   category: category_id, updateTime: now}
+    let newData = {...restParams, updateTime: now}
+    if (category_id) {
+      newData = {...newData, category: category_id}
+    }
     if (params.content) {
       newData = {...newData, content: decodeURIComponent(params.content)}
     }
