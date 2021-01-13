@@ -25,7 +25,7 @@ request.interceptors.response.use(
   },
   err => {
     console.log(`接口报错在request: ${err.request.path}`);
-    return Promise.reject(err);
+    return Promise.resolve(err);
   }
 );
 
