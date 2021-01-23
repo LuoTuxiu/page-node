@@ -24,8 +24,8 @@ request.interceptors.response.use(
     return res;
   },
   err => {
-    console.log(`接口报错在request: ${err.request.path}`);
-    return Promise.reject(err);
+    console.log(`接口报错在request: ${err.request.path} 原因是 错误码是：${err.response.status}，错误原因是${err.response.statusText}`);
+    return Promise.resolve(err);
   }
 );
 

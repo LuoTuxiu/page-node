@@ -11,7 +11,7 @@ import pageModel from '../models/pageModel';
 import CategoryModel from '../models/categoryModel'
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
-import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList } from '../auto-blog/jianshu/jianshu'
+import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList, updateJianshu } from '../auto-blog/jianshu/jianshu'
 import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
 
 
@@ -147,6 +147,7 @@ function initGraphQL(app: Koa): void {
       updateLocalBlog: ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
       publishJianshuBlog(pageId: String, content: String): ApiData
+      updateJianshuBlog(pageId: String, content: String, title: String, jianshu_id: String): ApiData
       deleteJianshuBlog(pageId: String, jianshu_id: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
       deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
@@ -271,6 +272,11 @@ function initGraphQL(app: Koa): void {
         const result = await updateJuejin(args);
         await pageModel.updatePage(result);
         return result;
+      },
+      updateJianshuBlog: async (_parent, args) => {
+        const result  = await updateJianshu(args)
+        await pageModel.updatePage(result)
+        return result
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {
         const result = await deleteJuejinBlog({ ...args });

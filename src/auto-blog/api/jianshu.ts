@@ -5,7 +5,7 @@ const URL_JIANSHU = 'https://www.jianshu.com';
 const judgeApi = data => {
   return new Promise((resolve) => {
     if (!data.data) {
-      resolve([data.response.data.error[0], null]);
+      resolve([data.response.data, null]);
     } else {
       resolve([null, data.data]);
     }

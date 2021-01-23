@@ -93,10 +93,14 @@ const PageModel = {
     const md5 = crypto.createHash('md5');
     const pageId = md5.update(`${category_id}\\${title}`).digest('hex');
     // todo 这里先不用判断是否最新，先直接插入数据
-    // const isNew = !(await PageCol.exists({ pageId }));
-    // if (!isNew) {
-    //   return Promise.resolve(undefined);
-    // }
+    const isNew = !(await PageCol.exists({ pageId }));
+    if (!isNew) {
+      const result = await this.updatePage({
+        ...params,
+        pageId
+      })
+      return result
+    }
     console.log(`category_id is ${category_id}`);
     const now = new Date().getTime()
     const newParams = {
@@ -116,7 +120,10 @@ const PageModel = {
       throw new Error('pageId required')
     }
     const now = new Date().getTime()
-    let newData = {...restParams,   category: category_id, updateTime: now}
+    let newData = {...restParams, updateTime: now}
+    if (category_id) {
+      newData = {...newData, category: category_id}
+    }
     if (params.content) {
       newData = {...newData, content: decodeURIComponent(params.content)}
     }

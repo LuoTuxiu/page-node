@@ -82,6 +82,29 @@ const postUpdateJianshuDraft = async ({ id, category_id, pageId } = {}) => {
   return Promise.resolve([err, data]);
 };
 
+// 自动更新草稿
+const postAutoUpdateJianshuDraft = async ({ id, title, content } = {}) => {
+  if (!id) {
+    console.warn(`check postUpdateJianshuDraft`);
+    return;
+  }
+  const params = {
+    data: {
+      autosave_control: 2,
+      id,
+      title,
+      content
+    }
+  };
+  const [err, data] = await postJianshuUpdateDraftApi(params);
+  if (err) {
+    console.log('postAutoUpdateJianshuDraft error');
+    console.log(err);
+    return;
+  }
+  return Promise.resolve([err, data]);
+};
+
 // 发布
 const postJianshuPublish = async ({ id }) => {
   const params = {
@@ -121,7 +144,7 @@ const deleteJianshuBlog = async ({ pageId, jianshu_id }) => {
   console.log(err)
   console.log(result)
   console.log('====================================');
-  if (!err || err.err_no === 404 || err.err_no === 0) { // err_no = 0 代表成功
+  if (!err || err.error === 'Record not found' || err.err_no === 0) { // err_no = 0 代表成功
     console.log(`删除简书在该行的记录`);
     await PageModel.updatePage({
       jianshu_id: '',
@@ -139,20 +162,23 @@ const deleteJianshuBlog = async ({ pageId, jianshu_id }) => {
 
 // 新建一篇简书博客
 const jianshuAddBlog = async ({ pageId }) => {
-	const { title, content } = await PageModel.queryOne({
+	const { title, content, jianshu_id } = await PageModel.queryOne({
     // 从本地读取博客信息
     pageId
   });
-	const [, categoryData] = await getJianshuCategory();
-  const { id: category_id_jianshu } = categoryData.find(
-    item => item.name === '前端' // todo 写死“前端”
-	);
-	console.log(`获取文章分类成功: ${category_id_jianshu}`);
-  const [, createData] = await postJianshuCreateDraft({
-		category_id_jianshu,
-		title
-	});
-	const {id} = createData // id为新建博客的id
+  let id = jianshu_id
+  if (!jianshu_id) {
+    const [, categoryData] = await getJianshuCategory();
+    const { id: category_id_jianshu } = categoryData.find(
+      item => item.name === '前端' // todo 写死“前端”
+    );
+    console.log(`获取文章分类成功: ${category_id_jianshu}`);
+    const [, createData] = await postJianshuCreateDraft({
+      category_id_jianshu,
+      title
+    });
+    id = createData.id // id为新建博客的id
+  }
 	console.log(`成功新建博客，id是${id}`);
 	const params = {
     data: {id,"autosave_control":1,title,content}
@@ -178,26 +204,26 @@ const jianshuAddBlog = async ({ pageId }) => {
  * 更新单个简书博客
  * @param param0
  */
-const updateJianshu = async ({ pageId, jianshu_id, content }) => {
+const updateJianshu = async ({ pageId, jianshu_id, content, title }) => {
   // const [, categoryData] = await getJianshuCategory();
   // const { category_id } = categoryData.find(
   //   item => item.category.category_name === '前端'
   // );
   await getJianshuArticleList()
-  const {draft_id, category_id} = await JianshuModel.queryOne({
-    jianshu_id
-  })
-  await postUpdateJianshuDraft({
-    category_id,
-    id: draft_id,
-    pageId,
+  // const {draft_id, category_id} = await JianshuModel.queryOne({
+  //   jianshu_id
+  // })
+  await postAutoUpdateJianshuDraft({
+    id: jianshu_id,
+    content: decodeURIComponent(content),
+    title
     // content
   });
   const [err, result] = await postJianshuPublish({
-    id: draft_id
+    id: jianshu_id
   });
   if (!err) {
-    await jianshuModel.syncJianshuToLocal({ ...result, pageId });
+    // await jianshuModel.syncJianshuToLocal({ ...result, pageId });
     return {
       article_id: result.article_id,
       pageId
