@@ -4,7 +4,7 @@ import 'module-alias/register'
 import graceful from 'graceful'
 
 // import ErrorHander from '@/middleware/ErrorHander';
-import AnalysicsHander from '@/middleware/AnalysicsHander';
+// import AnalysicsHander from '@/middleware/AnalysicsHander';
 import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
@@ -20,7 +20,7 @@ const app = new Koa();
 app.use(koaBody());
 
 // ErrorHander.init(app, logger);
-AnalysicsHander.init(app);
+// AnalysicsHander.init(app);
 headerHandle.init(app);
 // app.use(pino)
 // 初始化路由
