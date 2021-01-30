@@ -8,13 +8,20 @@ import graceful from 'graceful'
 import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
+import PageSettingModel from '@/models/pageSettingModel'
 
 
 // const pino = require('koa-pino-logger')({ prettyPrint: true})
 
-const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
+const getCookie  = async () => {
+	const result = await PageSettingModel.queryOne()
+	return result
+}
 
-global.CONFIG = CONFIG
+getCookie().then(newConfig => {
+	const {cookie_jianshu, cookie_juejin} = newConfig
+	global.Cookie = `${cookie_jianshu}${cookie_juejin}`
+})
 
 const app = new Koa();
 app.use(koaBody());

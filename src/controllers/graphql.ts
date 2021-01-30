@@ -9,6 +9,7 @@ import { applyMiddleware } from 'graphql-middleware'
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
 import CategoryModel from '../models/categoryModel'
+import PageSettingModel from '../models/pageSettingModel'
 import userModel from '../models/userModel';
 import { updateBlogFiles } from '../auto-blog/localBlog';
 import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList, updateJianshu } from '../auto-blog/jianshu/jianshu'
@@ -82,6 +83,11 @@ function initGraphQL(app: Koa): void {
       list: [Page]
     }
 
+    type PageSetting {
+      cookie_juejin: String
+      cookie_jianshu: String
+    }
+
     type JianshuPages {
       list: [JianshuPage]
     }
@@ -117,12 +123,13 @@ function initGraphQL(app: Koa): void {
 
     type Query {
       userInfo: User
-      pageList(page: Int, limit: Int, keyword: String): Pages
+      pageList(page: Int, limit: Int, keyword: String, category_id: String): Pages
       categoryList(page: Int, limit: Int): Categorys
       categoryAll: Categorys
       pageDetail(pageId: String): Page
       blogList: [Page]
       jianshuList: JianshuPages
+      getPageSetting: PageSetting
     }
 
     input NewPage {
@@ -133,6 +140,11 @@ function initGraphQL(app: Koa): void {
 
     input NewCategory {
       category_name: String
+    }
+
+    input EditPageSetting {
+      cookie_juejin: String
+      cookie_jianshu: String
     }
 
     type Mutation {
@@ -154,6 +166,7 @@ function initGraphQL(app: Koa): void {
       updatePage(pageId: String, content: String, title: String, category_id: String): ApiData
       addToLocal(category_id: String, content: String): ApiData
       deletePage(pageId: String): ApiData
+      updatePageSetting(input: EditPageSetting): ApiData
     }
 
     schema {
@@ -196,7 +209,11 @@ function initGraphQL(app: Koa): void {
         return { ...result[0], roles: ['admin'] };
         // }
         // return false;
-      }
+      },
+      getPageSetting: async (_parent: never, args: any) => {
+        const result = await PageSettingModel.queryOne();
+        return result;
+      },
     },
     Mutation: {
       login: async (_parent: never, args: LoginParams) => {
@@ -309,6 +326,10 @@ function initGraphQL(app: Koa): void {
       },
       addCategoryJianshu: async (_parent: never, args: any): Promise => {
         const result = await CategoryModel.addCategoryJianshu(args.input);
+        return result;
+      },
+      updatePageSetting: async (_parent: never, args: any): Promise => {
+        const result = await PageSettingModel.updatePageSetting(args.input);
         return result;
       },
     }
