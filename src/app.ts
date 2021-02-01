@@ -8,13 +8,22 @@ import graceful from 'graceful'
 import headerHandle from '@/middleware/headerHandle';
 import controller from '@/controllers';
 import config from '@/config';
+import PageSettingModel from '@/models/pageSettingModel'
 
 
-// const pino = require('koa-pino-logger')({ prettyPrint: true})
+const pino = require('koa-pino-logger')({ prettyPrint: {
+	translateTime: true
+}})
 
-const CONFIG = JSON.parse(require('fs').readFileSync('/Users/tuxiuluo/Desktop/config.json'))
+const getCookie  = async () => {
+	const result = await PageSettingModel.queryOne()
+	return result
+}
 
-global.CONFIG = CONFIG
+getCookie().then(newConfig => {
+	const {cookie_jianshu, cookie_juejin} = newConfig
+	global.Cookie = `${cookie_jianshu}${cookie_juejin}`
+})
 
 const app = new Koa();
 app.use(koaBody());
@@ -22,7 +31,7 @@ app.use(koaBody());
 // ErrorHander.init(app, logger);
 // AnalysicsHander.init(app);
 headerHandle.init(app);
-// app.use(pino)
+app.use(pino)
 // 初始化路由
 controller.init(app);
 
@@ -34,9 +43,10 @@ controller.init(app);
 console.log(`server is running at : http://localhost:${config.serverPort}`);
 
 // 全局异常捕获
-// process.on('uncaughtException', err => {
-//   logger.error(JSON.stringify(err));
-// });
+process.on('uncaughtException', err => {
+	// logger.error(JSON.stringify(err));
+	pino(err)
+});
 
 // 导出给 jest 测试
 const server = app.listen(config.serverPort);
