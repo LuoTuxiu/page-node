@@ -59,7 +59,8 @@ const PageCol = mogoose.model('pages', pageSechema);
 
 const PageModel = {
   async query(params: QueryPageType): Promise<any> {
-    const { page = 1, limit = 10, keyword } = params;
+    const { page = 1, limit = 10, keyword, category_id } = params;
+    console.log(params);
     const reg = new RegExp(keyword || '', 'i') // i 代表不区分大小写
     const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
     const findQuery = [{
@@ -76,7 +77,14 @@ const PageModel = {
         }
       ]
     }, null, { sort: { updateTime: -1 } }]
-    const all = await PageCol.find(...findQuery).populate('category')
+    if (category_id && category_id !== '0') {
+      findQuery[0] = Object.assign(findQuery[0], {
+        'category': category_id
+      })
+    }
+    const all = await PageCol.find(...findQuery).populate({
+      path: 'category',
+    })
     const list = await PageCol.find(...findQuery).populate('category').skip(offset).limit(limit)
     return {
       total: all.length,
