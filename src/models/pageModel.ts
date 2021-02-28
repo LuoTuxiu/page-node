@@ -20,6 +20,7 @@ interface UpdatePageType extends AddPageType {
   pageId: string; // 博客id
   juejin_id?: '',
   jianshu_id?: ''
+  own_blog_id?: ''
 }
 
 const crypto = require('crypto');
@@ -51,7 +52,9 @@ const pageSechema = new mogoose.Schema({
   juejin_id: String, // 掘金对应的id
   juejin_updateTime: Number,
   jianshu_id: String, // 简书对应的id
-  jianshu_updateTime: Number
+  jianshu_updateTime: Number,
+  own_blog_id: String, // 自建站对应的id
+  own_blog_updateTime: Number,
   // _id: String
 });
 
@@ -93,6 +96,7 @@ const PageModel = {
   },
   async queryOne(params: QueryPageDetailType): Promise<any> {
     const { pageId } = params;
+    console.log(`pageId is ${pageId}`);
     const result = await PageCol.findOne({ pageId }).populate('category');
     return result;
   },
@@ -140,6 +144,9 @@ const PageModel = {
     }
     if (params.jianshu_id) { // 发布简书
       newData = {...newData, jianshu_updateTime: now}
+    }
+    if (params.own_blog_id) { // 发布自建站博客
+      newData = {...newData, own_blog_updateTime: now}
     }
     return (PageCol.findOneAndUpdate(
       {pageId},

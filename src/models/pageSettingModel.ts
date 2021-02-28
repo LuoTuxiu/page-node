@@ -3,6 +3,7 @@ import DbHelper from '../utils/dbHelper';
 interface UpdatePageSettingType {
   cookie_juejin: string;
   cookie_jianshu: string;
+  own_blog_service_path: string;
 }
 
 const mogoose = DbHelper.connect();
@@ -16,6 +17,7 @@ const pageSechema = new mogoose.Schema({
     // required: true,
     type: String
   },
+  own_blog_service_path: String,
   updateTime: Number,
   createTime: Number,
 });
@@ -28,6 +30,7 @@ const PageSettingModel = {
     return result;
   },
   async updatePageSetting(params: UpdatePageSettingType): Promise<Page.Item> {
+    console.log(params);
     return (PageSettingCol.findOneAndUpdate(
       {},
       params,
