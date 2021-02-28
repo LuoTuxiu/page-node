@@ -1,12 +1,24 @@
 import fs from 'fs';
-import PageSettingModel from '@/models/pageSettingModel';
+import {getPageSetting} from '../utils'
 import { handleFileFromDir } from '../../utils';
 import pageModel from '../../models/pageModel';
+import {gitAdd, gitCommit, gitPush, gitCheckBranch, gitPull} from './node-git'
 import { uploadLocalFile } from './node-ftp';
 import { writeToLocalFile, deleteLocalFile } from './node-file';
 
 const crypto = require('crypto');
 
+async function updateGitStatus({message}) {
+  // const currentBranch = 'master'
+  const currentBranch = 'test'
+  await gitCheckBranch({targetBranch: currentBranch})
+  await gitPull({targetBranch: currentBranch})
+  await gitAdd()
+  await gitCommit({
+    message
+  })
+  await gitPush({targetBranch: currentBranch})
+}
 
 async function getAllLocalBlog(
   category_id = '/Users/tuxiuluo/Documents/Learn-note/docs'
@@ -31,18 +43,13 @@ async function getAllLocalBlog(
   });
 }
 
-async function getPageSetting() {
-  const result = await PageSettingModel.queryOne();
-  return result;
-}
-
 async function getLocalBlogPath (dir: string, pageId: string) {
   const { own_blog_service_path } = await getPageSetting();
   const md5 = crypto.createHash('md5');
-  const title = md5.update(`${pageId}`).digest('hex');
+  const own_blog_id = md5.update(`${pageId}`).digest('hex');
   return {
-    path: `${own_blog_service_path}/docs/${dir}/${title}.md`,
-    title
+    path: `${own_blog_service_path}/docs/${dir}/${own_blog_id}.md`,
+    own_blog_id
   }
 }
 
@@ -56,15 +63,17 @@ async function addLocalBlog(params) {
     console.warn('必须先选择一个分类'); // 这里要提示出错
     return
   }
-  const {path, title} = await getLocalBlogPath(pageDetail.category.category_name_en, pageId)
+  const {path, own_blog_id} = await getLocalBlogPath(pageDetail.category.category_name_en, pageId)
   const result = await writeToLocalFile(
     path,
     pageDetail.content,
   );
+  const message = `feat: add blog: ${pageDetail.title}`
+  await updateGitStatus({message})
   // if (!err) {
   // await juejinModel.syncJuejinToLocal({ ...result, pageId });
   return {
-    own_blog_id: title,
+    own_blog_id,
     pageId
   }
   // }
@@ -85,6 +94,8 @@ async function updateLocalBlog(params) {
     path,
     pageDetail.content,
   );
+  const message = `feat: update blog: ${pageDetail.title}`
+  await updateGitStatus({message})
   // if (!err) {
   // await juejinModel.syncJuejinToLocal({ ...result, pageId });
   return {
@@ -101,6 +112,8 @@ async function deleteLocalBlog(params) {
   });
   const {path} = await getLocalBlogPath(pageDetail.category.category_name_en, pageId)
   await deleteLocalFile(path)
+  const message = `feat: delete blog: ${pageDetail.title}`
+  await updateGitStatus({message})
   return {
     own_blog_id: '',
     pageId
