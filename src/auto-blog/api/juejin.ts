@@ -1,13 +1,13 @@
 import request from '@/utils/request';
 
-const URL_JUEJIN = 'https://apinew.juejin.im';
+const URL_JUEJIN = 'https://api.juejin.cn';
 
 const judgeApi = data => {
   return new Promise((resolve, reject) => {
-    if (!data.data.data) {
-      resolve([data.data, null]);
-    } else {
+    if (data && data.data && data.data.data) {
       resolve([null, data.data.data]);
+    } else {
+      resolve([data.data || data, null]);
     }
   });
 };

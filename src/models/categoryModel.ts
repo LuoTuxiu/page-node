@@ -6,11 +6,12 @@ interface QueryCategoryType {
 }
 
 interface QueryCategoryDetailType {
-  category_id: string // 分类id
+  category_id: string; // 分类id
 }
 
 interface AddCategoryType {
   category_name: string; // 分类名称
+  category_name_en: string; // 分类路径
 }
 
 interface AddCategoryJianshuType {
@@ -22,7 +23,7 @@ interface UpdateCategoryType extends AddCategoryType {
   category_id: string; // 分类id
 }
 
-interface DeleteCategoryType  {
+interface DeleteCategoryType {
   category_id: string; // 分类id
 }
 
@@ -35,7 +36,11 @@ const categorySechema = new mogoose.Schema({
   createTime: Number,
   category_name: {
     type: String,
-    require: true,
+    require: true
+  },
+  category_name_en: {
+    type: String,
+    require: true
   },
   category_id_jianshu: String
 });
@@ -45,13 +50,16 @@ const CategoryCol = mogoose.model('categorys', categorySechema);
 const CategoryModel = {
   async query(params: QueryCategoryType): Promise<any> {
     const { page = 1, limit = 10, ...args } = params;
-		const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
-		const findList = await CategoryCol.find(args, null, { sort: { updateTime: -1 } }).skip(offset)
-		.limit(limit)
+    const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
+    const findList = await CategoryCol.find(args, null, {
+      sort: { updateTime: -1 }
+    })
+      .skip(offset)
+      .limit(limit);
     const list = findList.map(item => {
-			item.category_id = item._id
-			return item
-		});
+      item.category_id = item._id;
+      return item;
+    });
     return {
       total: CategoryCol.estimatedDocumentCount(),
       list
@@ -59,11 +67,13 @@ const CategoryModel = {
   },
   async queryAll(params: QueryCategoryType): Promise<any> {
     const { ...args } = params;
-		const findList = await CategoryCol.find(args, null, { sort: { updateTime: -1 } })
+    const findList = await CategoryCol.find(args, null, {
+      sort: { updateTime: -1 }
+    });
     const list = findList.map(item => {
-			item.category_id = item._id
-			return item
-		});
+      item.category_id = item._id;
+      return item;
+    });
     return {
       total: CategoryCol.estimatedDocumentCount(),
       list
@@ -75,57 +85,60 @@ const CategoryModel = {
     return result;
   },
   async addCategory(params: AddCategoryType) {
-    const { category_name} = params
+    const { category_name, category_name_en } = params;
     // todo 这里先不用判断是否最新，先直接插入数据
     // const isNew = !(await CategoryCol.exists({ category_id }));
     // if (!isNew) {
     //   return Promise.resolve(undefined);
     // }
-    const now = new Date().getTime()
+    const now = new Date().getTime();
     const newParams = {
       category_name,
+      category_name_en,
       updateTime: now,
       createTime: now
     };
     const result = await CategoryCol.create(newParams);
     return result;
   },
-  async addCategoryJianshu(params: AddCategoryJianshuType): Promise<Category.Item> {
-    const { category_id, ...restParams } = params
+  async addCategoryJianshu(
+    params: AddCategoryJianshuType
+  ): Promise<Category.Item> {
+    const { category_id, ...restParams } = params;
     if (!category_id) {
-      throw new Error('category_id required')
+      throw new Error('category_id required');
     }
-    const now = new Date().getTime()
-    const newData = {...restParams, updateTime: now}
+    const now = new Date().getTime();
+    const newData = { ...restParams, updateTime: now };
     return (CategoryCol.findOneAndUpdate(
-      {_id: category_id},
+      { _id: category_id },
       newData,
       {
         upsert: true
       },
-      (error) => {
+      error => {
         if (error) {
-          throw error
+          throw error;
         }
       }
     ) as unknown) as Category.Item;
   },
   async updateCategory(params: UpdateCategoryType): Promise<Category.Item> {
-    const { category_id, ...restParams } = params
+    const { category_id, ...restParams } = params;
     if (!category_id) {
-      throw new Error('category_id required')
+      throw new Error('category_id required');
     }
-    const now = new Date().getTime()
-    const newData = {...restParams, updateTime: now}
+    const now = new Date().getTime();
+    const newData = { ...restParams, updateTime: now };
     return (CategoryCol.findOneAndUpdate(
-      {_id: category_id},
+      { _id: category_id },
       newData,
       {
         upsert: true
       },
-      (error) => {
+      error => {
         if (error) {
-          throw error
+          throw error;
         }
       }
     ) as unknown) as Category.Item;
@@ -144,14 +157,14 @@ const CategoryModel = {
   //   return result;
   // },
   async deleteCategory(params: DeleteCategoryType) {
-		if (!params.category_id) {
-			throw new Error('category_id required')
-		}
+    if (!params.category_id) {
+      throw new Error('category_id required');
+    }
     const result = await await CategoryCol.remove({
-			_id: params.category_id
-		})
-    return result
-  },
+      _id: params.category_id
+    });
+    return result;
+  }
 };
 
 export default CategoryModel;

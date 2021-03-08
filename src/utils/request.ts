@@ -25,7 +25,7 @@ request.interceptors.response.use(
   },
   err => {
     if (err.request) {
-      console.warn(`接口报错在request: ${err.request.path} 原因是 错误码是：${err.response.status}，错误原因是${err.response.statusText}`);
+      console.warn(`接口报错在request: ${err.request.path} 原因是 错误码是：${(err.response && err.response.status) || err.code}，错误原因是${(err.response && err.response.statusText) || err.message}`);
     }
     return Promise.resolve(err);
   }

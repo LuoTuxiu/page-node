@@ -46,7 +46,7 @@ const postJuejinCreateDraft = async originParams => {
   if (err) {
     console.log('postJuejinCreateDraft error');
     console.log(err);
-    return;
+    throw(err)
   }
   console.log('成功新建草稿');
   return Promise.resolve([err, data]);
@@ -159,6 +159,9 @@ const deleteJuejinBlog = async ({ pageId, juejin_id }) => {
 // 新建一篇掘金博客
 const juejinAddBlog = async ({ pageId, content }) => {
   const [, categoryData] = await getJuejinCategory();
+  if (!categoryData) {
+    throw new Error('获取掘金分类为空，请检查获取掘金分类接口')
+  }
   const { category_id } = categoryData.find(
     item => item.category.category_name === '前端' // todo 写死“前端”
   );

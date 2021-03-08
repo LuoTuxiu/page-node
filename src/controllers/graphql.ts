@@ -11,7 +11,7 @@ import pageModel from '../models/pageModel';
 import CategoryModel from '../models/categoryModel'
 import PageSettingModel from '../models/pageSettingModel'
 import userModel from '../models/userModel';
-import { updateBlogFiles } from '../auto-blog/localBlog';
+import { updateLocalBlog, deleteLocalBlog, addLocalBlog } from '../auto-blog/localBlog';
 import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList, updateJianshu } from '../auto-blog/jianshu/jianshu'
 import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
 
@@ -39,6 +39,7 @@ function initGraphQL(app: Koa): void {
       createTime: String
       category_name: String
       category_id: String
+      category_name_en: String
       _id: String
     }
 
@@ -58,6 +59,8 @@ function initGraphQL(app: Koa): void {
       jianshu_id: String
       juejin_updateTime: String
       jianshu_updateTime: String
+      own_blog_id: String
+      own_blog_updateTime: String
     }
 
     type JianshuPage {
@@ -86,6 +89,7 @@ function initGraphQL(app: Koa): void {
     type PageSetting {
       cookie_juejin: String
       cookie_jianshu: String
+      own_blog_service_path: String
     }
 
     type JianshuPages {
@@ -140,11 +144,13 @@ function initGraphQL(app: Koa): void {
 
     input NewCategory {
       category_name: String
+      category_name_en: String
     }
 
     input EditPageSetting {
       cookie_juejin: String
       cookie_jianshu: String
+      own_blog_service_path: String
     }
 
     type Mutation {
@@ -155,8 +161,10 @@ function initGraphQL(app: Koa): void {
       addCategory(input: NewCategory): ApiData
       addCategoryJianshu(input: NewCategory): ApiData
       deleteCategory(category_id: String): ApiData
-      updateCategory(category_id: String, category_name: String): ApiData
-      updateLocalBlog: ApiData
+      updateCategory(category_id: String, category_name: String, category_name_en: String): ApiData
+      updateLocalBlog(pageId: String): ApiData
+      addLocalBlog(pageId: String): ApiData
+      deleteLocalBlog(pageId: String): ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
       publishJianshuBlog(pageId: String, content: String): ApiData
       updateJianshuBlog(pageId: String, content: String, title: String, jianshu_id: String): ApiData
@@ -276,9 +284,20 @@ function initGraphQL(app: Koa): void {
         const result = await pageModel.deletePage(args)
         return result
       },
-      updateLocalBlog: async () => {
-        // const result = await updateBlogFiles();
-        // return result;
+      updateLocalBlog: async (_parent: never, args: any) => {
+        const result = await updateLocalBlog(args);
+        await pageModel.updatePage(result);
+        return result;
+      },
+      addLocalBlog: async (_parent: never, args: any) => {
+        const result = await addLocalBlog(args);
+        await pageModel.updatePage(result);
+        return result;
+      },
+      deleteLocalBlog: async(_parent: never, args: any):Promies => {
+        const result = await deleteLocalBlog(args);
+        await pageModel.updatePage(result);
+        return result
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
         const result = await juejinAddBlog(args);
