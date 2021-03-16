@@ -77,7 +77,7 @@ const postUpdateJuejinDraft = async ({ id, category_id, pageId } = {}) => {
     data: {
       id,
       category_id,
-      tag_ids: ['6809640357354012685'],
+      tag_ids: ['6809640407484334093'],
       link_url: '',
       cover_image: '',
       title,
