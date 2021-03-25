@@ -1,4 +1,4 @@
-import DbHelper from '../utils/dbHelper';
+import DbHelper from '@/utils/dbHelper';
 
 interface QueryPageType {
   page: number;
@@ -7,20 +7,20 @@ interface QueryPageType {
 }
 
 interface QueryPageDetailType {
-  pageId: string // 博客id
+  pageId: string; // 博客id
 }
 
 interface AddPageType {
   category_id: string; // 分组
   content: string;
-  title: string,
+  title: string;
 }
 
 interface UpdatePageType extends AddPageType {
   pageId: string; // 博客id
-  juejin_id?: '',
-  jianshu_id?: ''
-  own_blog_id?: ''
+  juejin_id?: '';
+  jianshu_id?: '';
+  own_blog_id?: '';
 }
 
 const crypto = require('crypto');
@@ -54,7 +54,7 @@ const pageSechema = new mogoose.Schema({
   jianshu_id: String, // 简书对应的id
   jianshu_updateTime: Number,
   own_blog_id: String, // 自建站对应的id
-  own_blog_updateTime: Number,
+  own_blog_updateTime: Number
   // _id: String
 });
 
@@ -64,31 +64,38 @@ const PageModel = {
   async query(params: QueryPageType): Promise<any> {
     const { page = 1, limit = 10, keyword, category_id } = params;
     console.log(params);
-    const reg = new RegExp(keyword || '', 'i') // i 代表不区分大小写
+    const reg = new RegExp(keyword || '', 'i'); // i 代表不区分大小写
     const offset = (page - 1 >= 0 ? page - 1 : 0) * limit;
-    const findQuery = [{
-      $or: [
-        {
-          content: {
-            $regex: reg
-          }
-        },
-        {
-          title: {
-            $regex: reg
+    const findQuery = [
+      {
+        $or: [
+          {
+            content: {
+              $regex: reg
+            }
           },
-        }
-      ]
-    }, null, { sort: { updateTime: -1 } }]
+          {
+            title: {
+              $regex: reg
+            }
+          }
+        ]
+      },
+      null,
+      { sort: { updateTime: -1 } }
+    ];
     if (category_id && category_id !== '0') {
       findQuery[0] = Object.assign(findQuery[0], {
-        'category': category_id
-      })
+        category: category_id
+      });
     }
     const all = await PageCol.find(...findQuery).populate({
-      path: 'category',
-    })
-    const list = await PageCol.find(...findQuery).populate('category').skip(offset).limit(limit)
+      path: 'category'
+    });
+    const list = await PageCol.find(...findQuery)
+      .populate('category')
+      .skip(offset)
+      .limit(limit);
     return {
       total: all.length,
       list
@@ -101,7 +108,7 @@ const PageModel = {
     return result;
   },
   async addPage(params: AddPageType) {
-    const {category_id, content, title} = params
+    const { category_id, content, title } = params;
     const md5 = crypto.createHash('md5');
     const pageId = md5.update(`${category_id}\\${title}`).digest('hex');
     // todo 这里先不用判断是否最新，先直接插入数据
@@ -110,11 +117,11 @@ const PageModel = {
       const result = await this.updatePage({
         ...params,
         pageId
-      })
-      return result
+      });
+      return result;
     }
     console.log(`category_id is ${category_id}`);
-    const now = new Date().getTime()
+    const now = new Date().getTime();
     const newParams = {
       content: decodeURIComponent(content),
       pageId,
@@ -127,36 +134,39 @@ const PageModel = {
     return result;
   },
   async updatePage(params: UpdatePageType): Promise<Page.Item> {
-    const { pageId, category_id, ...restParams } = params
+    const { pageId, category_id, ...restParams } = params;
     if (!pageId) {
-      throw new Error('pageId required')
+      throw new Error('pageId required');
     }
-    const now = new Date().getTime()
-    let newData = {...restParams, updateTime: now}
+    const now = new Date().getTime();
+    let newData = { ...restParams, updateTime: now };
     if (category_id) {
-      newData = {...newData, category: category_id}
+      newData = { ...newData, category: category_id };
     }
     if (params.content) {
-      newData = {...newData, content: decodeURIComponent(params.content)}
+      newData = { ...newData, content: decodeURIComponent(params.content) };
     }
-    if (params.juejin_id) { // 发布掘金
-      newData = {...newData, juejin_updateTime: now}
+    if (params.juejin_id) {
+      // 发布掘金
+      newData = { ...newData, juejin_updateTime: now };
     }
-    if (params.jianshu_id) { // 发布简书
-      newData = {...newData, jianshu_updateTime: now}
+    if (params.jianshu_id) {
+      // 发布简书
+      newData = { ...newData, jianshu_updateTime: now };
     }
-    if (params.own_blog_id) { // 发布自建站博客
-      newData = {...newData, own_blog_updateTime: now}
+    if (params.own_blog_id) {
+      // 发布自建站博客
+      newData = { ...newData, own_blog_updateTime: now };
     }
     return (PageCol.findOneAndUpdate(
-      {pageId},
+      { pageId },
       newData,
       {
         upsert: true
       },
-      (error) => {
+      error => {
         if (error) {
-          throw error
+          throw error;
         }
       }
     ) as unknown) as Page.Item;
@@ -176,9 +186,9 @@ const PageModel = {
   // },
   async deletePage(params: QueryPageDetailType) {
     // 看是否有掘金博客，如有有，是否需要先删除掘金博客
-    const result = await await PageCol.remove(params)
-    return result
-  },
+    const result = await await PageCol.remove(params);
+    return result;
+  }
 };
 
 export default PageModel;

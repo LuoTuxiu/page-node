@@ -71,18 +71,17 @@ export const postCsdnPublishApi = async (params = {}) => {
 };
 
 // 获取CSDN文章列表
-export const getCsdnArticleListApi = async (params = {
-}) => {
+export const getCsdnArticleListApi = async (params = {}) => {
   const url = '/article/list?pageSize=20';
   const data = await request({
     url,
     baseURL: URL_CSDN,
-		method: 'POST',
-		headers: {
-			'x-ca-signature': 'kuzvLCBvw8O7WQPXFu2P1EKiL1qfuJrHV1ggPc59JRE=',
-			'x-ca-nonce': 'fff7a39b-9c55-4452-91ea-4af2bc61b86a'
-		},
+    method: 'POST',
+    headers: {
+      'x-ca-signature': 'kuzvLCBvw8O7WQPXFu2P1EKiL1qfuJrHV1ggPc59JRE=',
+      'x-ca-nonce': 'fff7a39b-9c55-4452-91ea-4af2bc61b86a'
+    },
     ...params
   });
-  return judgeApi(data)
+  return judgeApi(data);
 };

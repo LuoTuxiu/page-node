@@ -8,21 +8,21 @@ interface QueryPageType {
 }
 
 const jianshuSechema = new mogoose.Schema({
-	autosave_control: Number,
-	content_updated_at: Number,
-	id: Number,
-	in_book: Boolean,
-	is_top: Boolean,
-	last_compiled_at: Number,
-	note_type: Number,
-	notebook_id: Number,
-	paid: Boolean,
-	reprintable: Boolean,
-	schedule_publish_at: Object,
-	seq_in_nb: Number,
-	shared: Boolean,
-	slug: String,
-	title: String,
+  autosave_control: Number,
+  content_updated_at: Number,
+  id: Number,
+  in_book: Boolean,
+  is_top: Boolean,
+  last_compiled_at: Number,
+  note_type: Number,
+  notebook_id: Number,
+  paid: Boolean,
+  reprintable: Boolean,
+  schedule_publish_at: Object,
+  seq_in_nb: Number,
+  shared: Boolean,
+  slug: String,
+  title: String
 });
 
 const jianshuCol = mogoose.model('jianshu', jianshuSechema);
@@ -48,9 +48,9 @@ const JianshuModel = {
   },
   async queryOne(params: object): Promise<any> {
     const { jianshu_id } = params;
-    const result = await jianshuCol.findOne({ article_id:jianshu_id  });
+    const result = await jianshuCol.findOne({ article_id: jianshu_id });
     return result;
-  },
+  }
 };
 
 export default JianshuModel;

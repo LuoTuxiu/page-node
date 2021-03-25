@@ -6,7 +6,7 @@ import {
   postCsdnCreateDraftApi,
   getCsdnArticleListApi
 } from '../api/csdn';
-import csdnModel from '../../models/csdnModel'
+import csdnModel from '../../models/csdnModel';
 
 // 获取分类
 const getCsdnCategory = async () => {
@@ -119,8 +119,8 @@ const getCsdnArticleList = async () => {
     return;
   }
   data.forEach(async item => {
-    await csdnModel.syncCsdnToLocal(item.article_info)
-  })
+    await csdnModel.syncCsdnToLocal(item.article_info);
+  });
   console.log('获取文章列表成功');
   // console.log(data);
 };
@@ -142,7 +142,7 @@ const csdnAddBlog = async () => {
   // await postCsdnPublish({
   //   id
   // });
-  await getCsdnArticleList()
+  await getCsdnArticleList();
 };
 export {
   getCsdnCategory,
@@ -150,6 +150,6 @@ export {
   getCsdnTags,
   postCsdnDraft,
   postCsdnPublish,
-	csdnAddBlog,
-	getCsdnArticleList
+  csdnAddBlog,
+  getCsdnArticleList
 };

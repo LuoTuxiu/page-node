@@ -84,7 +84,9 @@
     "webpack-bundle-analyzer": "^3.6.0",
     "webpack-deep-scope-plugin": "^1.6.2",
     "webpack-merge": "^4.2.2",
-    "workbox-webpack-plugin": "^4.3.1"
+    "workbox-webpack-plugin": "^4.3.1",
+    "koa-pino-logger": "^3.0.0",
+    "module-alias": "^2.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",
@@ -136,10 +138,8 @@
     "jest": "^24.9.0",
     "jest-canvas-mock": "^2.2.0",
     "jest-fetch-mock": "^3.0.1",
-    "koa-pino-logger": "^3.0.0",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
-    "module-alias": "^2.2.2",
     "npm-run-all": "^4.1.5",
     "pino-pretty": "^4.3.0",
     "postcss-loader": "^3.0.0",

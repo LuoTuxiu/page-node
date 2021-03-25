@@ -28,31 +28,29 @@ const remote = '/home/luo/Learn-note.tgz';
 // 	return list;
 // }
 const compress = async () => {
-	return await compressing.tgz.compressDir(localUrl, localTarUrl);
+  return await compressing.tgz.compressDir(localUrl, localTarUrl);
 };
 
 const putFileToRemote = async () => {
-	await compress();
-	const buffer = fs.readFileSync(localTarUrl);
-	console.log(buffer);
-	console.log(remote);
-	return sftp.put(buffer, remote);
-}
+  await compress();
+  const buffer = fs.readFileSync(localTarUrl);
+  console.log(buffer);
+  console.log(remote);
+  return sftp.put(buffer, remote);
+};
 
 const uploadLocalFile = async () => {
-	try {
-		await sftp.list(remote)
-	} catch (error) {
-		await sftp.connect({
-			...global.CONFIG.ftp,
-			readyTimeout: 10000,
-			retries: 2,
-		})
-	}
-	await putFileToRemote()
-	await require('./node-ssh');
-}
+  try {
+    await sftp.list(remote);
+  } catch (error) {
+    await sftp.connect({
+      ...global.CONFIG.ftp,
+      readyTimeout: 10000,
+      retries: 2
+    });
+  }
+  await putFileToRemote();
+  await require('./node-ssh');
+};
 
-export {
-	uploadLocalFile
-}
+export { uploadLocalFile };

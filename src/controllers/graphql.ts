@@ -5,16 +5,28 @@ import {
   UserInputError
 } from 'apollo-server-koa';
 import * as Koa from 'koa';
-import { applyMiddleware } from 'graphql-middleware'
+import { applyMiddleware } from 'graphql-middleware';
 import { makeExecutableSchema } from 'graphql-tools';
 import pageModel from '../models/pageModel';
-import CategoryModel from '../models/categoryModel'
-import PageSettingModel from '../models/pageSettingModel'
+import CategoryModel from '../models/categoryModel';
+import PageSettingModel from '../models/pageSettingModel';
 import userModel from '../models/userModel';
-import { updateLocalBlog, deleteLocalBlog, addLocalBlog } from '../auto-blog/localBlog';
-import {jianshuAddBlog, deleteJianshuBlog, getJianshuArticleList, updateJianshu } from '../auto-blog/jianshu/jianshu'
-import { juejinAddBlog, deleteJuejinBlog, updateJuejin } from '../auto-blog/juejin/juejin';
-
+import {
+  updateLocalBlog,
+  deleteLocalBlog,
+  addLocalBlog
+} from '../auto-blog/localBlog';
+import {
+  jianshuAddBlog,
+  deleteJianshuBlog,
+  getJianshuArticleList,
+  updateJianshu
+} from '../auto-blog/jianshu/jianshu';
+import {
+  juejinAddBlog,
+  deleteJuejinBlog,
+  updateJuejin
+} from '../auto-blog/juejin/juejin';
 
 interface LoginParams {
   name: string;
@@ -127,7 +139,12 @@ function initGraphQL(app: Koa): void {
 
     type Query {
       userInfo: User
-      pageList(page: Int, limit: Int, keyword: String, category_id: String): Pages
+      pageList(
+        page: Int
+        limit: Int
+        keyword: String
+        category_id: String
+      ): Pages
       categoryList(page: Int, limit: Int): Categorys
       categoryAll: Categorys
       pageDetail(pageId: String): Page
@@ -161,17 +178,31 @@ function initGraphQL(app: Koa): void {
       addCategory(input: NewCategory): ApiData
       addCategoryJianshu(input: NewCategory): ApiData
       deleteCategory(category_id: String): ApiData
-      updateCategory(category_id: String, category_name: String, category_name_en: String): ApiData
+      updateCategory(
+        category_id: String
+        category_name: String
+        category_name_en: String
+      ): ApiData
       updateLocalBlog(pageId: String): ApiData
       addLocalBlog(pageId: String): ApiData
       deleteLocalBlog(pageId: String): ApiData
       publishJuejinBlog(pageId: String, content: String): ApiData
       publishJianshuBlog(pageId: String, content: String): ApiData
-      updateJianshuBlog(pageId: String, content: String, title: String, jianshu_id: String): ApiData
+      updateJianshuBlog(
+        pageId: String
+        content: String
+        title: String
+        jianshu_id: String
+      ): ApiData
       deleteJianshuBlog(pageId: String, jianshu_id: String): ApiData
       updateJuejinBlog(pageId: String, juejin_id: String): ApiData
       deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
-      updatePage(pageId: String, content: String, title: String, category_id: String): ApiData
+      updatePage(
+        pageId: String
+        content: String
+        title: String
+        category_id: String
+      ): ApiData
       addToLocal(category_id: String, content: String): ApiData
       deletePage(pageId: String): ApiData
       updatePageSetting(input: EditPageSetting): ApiData
@@ -194,11 +225,15 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       categoryList: async (_parent: never, args: any) => {
-        const result: boolean | page.CategoryItem[] = await CategoryModel.query(args);
+        const result: boolean | page.CategoryItem[] = await CategoryModel.query(
+          args
+        );
         return result;
       },
       categoryAll: async (_parent: never, args: any) => {
-        const result: boolean | page.CategoryItem[] = await CategoryModel.queryAll(args);
+        const result:
+          | boolean
+          | page.CategoryItem[] = await CategoryModel.queryAll(args);
         return result;
       },
       pageDetail: async (_parent: never, args: any) => {
@@ -206,9 +241,9 @@ function initGraphQL(app: Koa): void {
         if (!result) {
           console.log(`进入报错`);
           throw new ApolloError('user error', 10001);
-          throw new Error('get detail error')
+          throw new Error('get detail error');
         }
-        return result
+        return result;
       },
       userInfo: async (_parent: never, args: any): Promise<any> => {
         const result: boolean | user.Info[] = userModel.query(args);
@@ -221,7 +256,7 @@ function initGraphQL(app: Koa): void {
       getPageSetting: async (_parent: never, args: any) => {
         const result = await PageSettingModel.queryOne();
         return result;
-      },
+      }
     },
     Mutation: {
       login: async (_parent: never, args: LoginParams) => {
@@ -280,9 +315,9 @@ function initGraphQL(app: Koa): void {
         const result = await pageModel.addPage(args.input);
         return result;
       },
-      deletePage: async(_parent: never, args: any):Promies => {
-        const result = await pageModel.deletePage(args)
-        return result
+      deletePage: async (_parent: never, args: any): Promies => {
+        const result = await pageModel.deletePage(args);
+        return result;
       },
       updateLocalBlog: async (_parent: never, args: any) => {
         const result = await updateLocalBlog(args);
@@ -294,10 +329,10 @@ function initGraphQL(app: Koa): void {
         await pageModel.updatePage(result);
         return result;
       },
-      deleteLocalBlog: async(_parent: never, args: any):Promies => {
+      deleteLocalBlog: async (_parent: never, args: any): Promies => {
         const result = await deleteLocalBlog(args);
         await pageModel.updatePage(result);
-        return result
+        return result;
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
         const result = await juejinAddBlog(args);
@@ -310,9 +345,9 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       updateJianshuBlog: async (_parent, args) => {
-        const result  = await updateJianshu(args)
-        await pageModel.updatePage(result)
-        return result
+        const result = await updateJianshu(args);
+        await pageModel.updatePage(result);
+        return result;
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {
         const result = await deleteJuejinBlog({ ...args });
@@ -320,10 +355,10 @@ function initGraphQL(app: Koa): void {
       },
       publishJianshuBlog: async (_parent: never, args: any) => {
         const [err, data] = await jianshuAddBlog(args);
-        if(!err) {
+        if (!err) {
           await pageModel.updatePage(data);
         } else {
-          throw new ApolloError(err.message, err.code)
+          throw new ApolloError(err.message, err.code);
           // throw err
         }
       },
@@ -335,9 +370,9 @@ function initGraphQL(app: Koa): void {
         const result = await CategoryModel.addCategory(args.input);
         return result;
       },
-      deleteCategory: async(_parent: never, args: any):Promies => {
-        const result = await CategoryModel.deleteCategory(args)
-        return result
+      deleteCategory: async (_parent: never, args: any): Promies => {
+        const result = await CategoryModel.deleteCategory(args);
+        return result;
       },
       updateCategory: async (_parent: never, args: any): Promise => {
         const result = await CategoryModel.updateCategory(args);
@@ -350,7 +385,7 @@ function initGraphQL(app: Koa): void {
       updatePageSetting: async (_parent: never, args: any): Promise => {
         const result = await PageSettingModel.updatePageSetting(args.input);
         return result;
-      },
+      }
     }
   };
 
@@ -358,15 +393,15 @@ function initGraphQL(app: Koa): void {
     Query: {
       pageDetail: async (resolve, parent, args, context, info) => {
         // You can use middleware to override arguments
-        const argsWithDefault = { name: 'Bob', ...args }
-        const result = await resolve(parent, argsWithDefault, context, info)
+        const argsWithDefault = { name: 'Bob', ...args };
+        const result = await resolve(parent, argsWithDefault, context, info);
         // Or change the returned values of resolvers
-        return result
+        return result;
         // return result.replace(/Trump/g, 'beep')
         // return {error: 222}
-      },
-    },
-  }
+      }
+    }
+  };
 
   // const logInput = async (resolve, root, args, context, info) => {
   //   console.log(`1. logInput: ${JSON.stringify(args)}`)
@@ -377,13 +412,10 @@ function initGraphQL(app: Koa): void {
 
   const myGraphQLSchema = makeExecutableSchema({
     typeDefs,
-    resolvers,
+    resolvers
     // middlewares: [logInput],
   });
-  const schemaWithMiddleware = applyMiddleware(
-    myGraphQLSchema,
-    beepMiddleware,
-  )
+  const schemaWithMiddleware = applyMiddleware(myGraphQLSchema, beepMiddleware);
   const server = new ApolloServer({ schema: myGraphQLSchema });
   server.applyMiddleware({ app });
 }
