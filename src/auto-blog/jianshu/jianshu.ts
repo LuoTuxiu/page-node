@@ -147,7 +147,7 @@ const deleteJianshuBlog = async ({ pageId, jianshu_id }) => {
   if (!err || err.error === 'Record not found' || err.err_no === 0) {
     // err_no = 0 代表成功
     console.log(`删除简书在该行的记录`);
-    await PageModel.updatePage({
+    await PageModel.update({
       jianshu_id: '',
       pageId
     });

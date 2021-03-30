@@ -1,32 +1,28 @@
-import {
-  ApolloServer,
-  gql,
-  ApolloError,
-  UserInputError
-} from 'apollo-server-koa';
+import { ApolloServer, ApolloError, UserInputError } from 'apollo-server-koa';
 import * as Koa from 'koa';
 import { applyMiddleware } from 'graphql-middleware';
 import { makeExecutableSchema } from 'graphql-tools';
-import pageModel from '../models/pageModel';
-import CategoryModel from '../models/categoryModel';
-import PageSettingModel from '../models/pageSettingModel';
-import userModel from '../models/userModel';
+import pageModel from '@/models/pageModel';
+import CategoryModel from '@/models/categoryModel';
+import PageSettingModel from '@/models/pageSettingModel';
+import userModel from '@/models/userModel';
 import {
   updateLocalBlog,
   deleteLocalBlog,
   addLocalBlog
-} from '../auto-blog/localBlog';
+} from '@/auto-blog/localBlog';
 import {
   jianshuAddBlog,
   deleteJianshuBlog,
   getJianshuArticleList,
   updateJianshu
-} from '../auto-blog/jianshu/jianshu';
+} from '@/auto-blog/jianshu/jianshu';
 import {
   juejinAddBlog,
   deleteJuejinBlog,
   updateJuejin
-} from '../auto-blog/juejin/juejin';
+} from '@/auto-blog/juejin/juejin';
+import typeDefs from './graphqlType';
 
 interface LoginParams {
   name: string;
@@ -45,175 +41,6 @@ interface ApiData {
 }
 
 function initGraphQL(app: Koa): void {
-  const typeDefs = gql`
-    type Category {
-      updateTime: String
-      createTime: String
-      category_name: String
-      category_id: String
-      category_name_en: String
-      _id: String
-    }
-
-    type Page {
-      pageId: String
-      category: Category
-      url: String
-      content: String
-      endTime: String
-      updateTime: String
-      createTime: String
-      title: String
-      description: String
-      keyword: String
-      originPath: String
-      juejin_id: String
-      jianshu_id: String
-      juejin_updateTime: String
-      jianshu_updateTime: String
-      own_blog_id: String
-      own_blog_updateTime: String
-    }
-
-    type JianshuPage {
-      autosave_control: Int
-      content_updated_at: Int
-      id: Int
-      in_book: Boolean
-      is_top: Boolean
-      last_compiled_at: Int
-      note_type: Int
-      notebook_id: Int
-      paid: Boolean
-      reprintable: Boolean
-      schedule_publish_at: String
-      seq_in_nb: Int
-      shared: Boolean
-      slug: String
-      title: String
-    }
-
-    type Pages {
-      total: Int
-      list: [Page]
-    }
-
-    type PageSetting {
-      cookie_juejin: String
-      cookie_jianshu: String
-      own_blog_service_path: String
-    }
-
-    type JianshuPages {
-      list: [JianshuPage]
-    }
-
-    type Categorys {
-      total: Int
-      list: [Category]
-    }
-
-    type User {
-      name: String
-      passwd: String
-      createTime: Int
-      roles: [String]
-    }
-
-    type UserParams {
-      name: String
-      passwd: String
-      token: String
-    }
-
-    type PageParams {
-      page: String
-      limit: String
-    }
-
-    type ApiData {
-      code: Int
-      data: String
-      msg: String
-    }
-
-    type Query {
-      userInfo: User
-      pageList(
-        page: Int
-        limit: Int
-        keyword: String
-        category_id: String
-      ): Pages
-      categoryList(page: Int, limit: Int): Categorys
-      categoryAll: Categorys
-      pageDetail(pageId: String): Page
-      blogList: [Page]
-      jianshuList: JianshuPages
-      getPageSetting: PageSetting
-    }
-
-    input NewPage {
-      category_id: String
-      content: String
-      title: String
-    }
-
-    input NewCategory {
-      category_name: String
-      category_name_en: String
-    }
-
-    input EditPageSetting {
-      cookie_juejin: String
-      cookie_jianshu: String
-      own_blog_service_path: String
-    }
-
-    type Mutation {
-      login(name: String, passwd: String): UserParams
-      logout: ApiData
-      register(name: String, passwd: String): ApiData
-      addPage(input: NewPage): ApiData
-      addCategory(input: NewCategory): ApiData
-      addCategoryJianshu(input: NewCategory): ApiData
-      deleteCategory(category_id: String): ApiData
-      updateCategory(
-        category_id: String
-        category_name: String
-        category_name_en: String
-      ): ApiData
-      updateLocalBlog(pageId: String): ApiData
-      addLocalBlog(pageId: String): ApiData
-      deleteLocalBlog(pageId: String): ApiData
-      publishJuejinBlog(pageId: String, content: String): ApiData
-      publishJianshuBlog(pageId: String, content: String): ApiData
-      updateJianshuBlog(
-        pageId: String
-        content: String
-        title: String
-        jianshu_id: String
-      ): ApiData
-      deleteJianshuBlog(pageId: String, jianshu_id: String): ApiData
-      updateJuejinBlog(pageId: String, juejin_id: String): ApiData
-      deleteJuejinBlog(pageId: String, juejin_id: String): ApiData
-      updatePage(
-        pageId: String
-        content: String
-        title: String
-        category_id: String
-      ): ApiData
-      addToLocal(category_id: String, content: String): ApiData
-      deletePage(pageId: String): ApiData
-      updatePageSetting(input: EditPageSetting): ApiData
-    }
-
-    schema {
-      query: Query
-      mutation: Mutation
-    }
-  `;
-
   const resolvers = {
     Query: {
       pageList: async (_parent: never, args: any) => {
@@ -308,7 +135,7 @@ function initGraphQL(app: Koa): void {
         // return Promise.reject(new Error('register error'))
       },
       updatePage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.updatePage(args);
+        const result = await pageModel.update(args);
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
@@ -316,37 +143,37 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       deletePage: async (_parent: never, args: any): Promies => {
-        const result = await pageModel.deletePage(args);
+        const result = await pageModel.remove(args);
         return result;
       },
       updateLocalBlog: async (_parent: never, args: any) => {
         const result = await updateLocalBlog(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       addLocalBlog: async (_parent: never, args: any) => {
         const result = await addLocalBlog(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       deleteLocalBlog: async (_parent: never, args: any): Promies => {
         const result = await deleteLocalBlog(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       publishJuejinBlog: async (_parent: never, args: any) => {
         const result = await juejinAddBlog(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       updateJuejinBlog: async (_parent: never, args: any) => {
         const result = await updateJuejin(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       updateJianshuBlog: async (_parent, args) => {
         const result = await updateJianshu(args);
-        await pageModel.updatePage(result);
+        await pageModel.update(result);
         return result;
       },
       deleteJuejinBlog: async (_parent: never, args: any) => {
@@ -356,7 +183,7 @@ function initGraphQL(app: Koa): void {
       publishJianshuBlog: async (_parent: never, args: any) => {
         const [err, data] = await jianshuAddBlog(args);
         if (!err) {
-          await pageModel.updatePage(data);
+          await pageModel.update(data);
         } else {
           throw new ApolloError(err.message, err.code);
           // throw err
@@ -402,13 +229,6 @@ function initGraphQL(app: Koa): void {
       }
     }
   };
-
-  // const logInput = async (resolve, root, args, context, info) => {
-  //   console.log(`1. logInput: ${JSON.stringify(args)}`)
-  //   const result = await resolve(root, args, context, info)
-  //   console.log(`5. logInput`)
-  //   return result
-  // }
 
   const myGraphQLSchema = makeExecutableSchema({
     typeDefs,

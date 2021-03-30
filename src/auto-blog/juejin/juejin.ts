@@ -143,7 +143,7 @@ const deleteJuejinBlog = async ({ pageId, juejin_id }) => {
   if (!err || err.err_no === 404 || err.err_no === 0) {
     // err_no = 0 代表成功
     console.log(`删除掘金在该行的记录`);
-    await PageModel.updatePage({
+    await PageModel.update({
       juejin_id: '',
       pageId
     });

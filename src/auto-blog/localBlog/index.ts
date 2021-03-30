@@ -35,7 +35,7 @@ async function getAllLocalBlog(
     const titleList = item.replace('.md', '').split('/');
     const content = fs.readFileSync(item, 'utf8');
     if (content) {
-      await pageModel.addPage(
+      await pageModel.add(
         {
           content,
           title: titleList[titleList.length - 1],
