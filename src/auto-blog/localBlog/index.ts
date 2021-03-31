@@ -14,9 +14,9 @@ import { writeToLocalFile, deleteLocalFile } from './node-file';
 
 const crypto = require('crypto');
 
-async function updateGitStatus({ message }) {
-  // const currentBranch = 'master'
-  const currentBranch = 'test';
+async function updateGitStatus({ message }: { message: string }) {
+  const currentBranch = 'master';
+  // const currentBranch = 'test';
   await gitCheckBranch({ targetBranch: currentBranch });
   await gitPull({ targetBranch: currentBranch });
   await gitAdd();
