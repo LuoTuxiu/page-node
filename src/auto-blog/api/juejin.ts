@@ -71,8 +71,7 @@ export const postJuejinPublishApi = async (params = {}) => {
 };
 
 // 获取掘金文章列表
-export const getJuejinArticleListApi = async (params = {
-}) => {
+export const getJuejinArticleListApi = async (params = {}) => {
   const url = '/content_api/v1/article/query_list';
   const data = await request({
     url,
@@ -80,12 +79,11 @@ export const getJuejinArticleListApi = async (params = {
     method: 'POST',
     ...params
   });
-  return judgeApi(data)
+  return judgeApi(data);
 };
 
 // 删除掘金文章
-export const deleteJuejinArticleApi = async (params = {
-}) => {
+export const deleteJuejinArticleApi = async (params = {}) => {
   const url = '/content_api/v1/article/delete';
   const data = await request({
     url,
@@ -93,5 +91,5 @@ export const deleteJuejinArticleApi = async (params = {
     method: 'POST',
     ...params
   });
-  return judgeApi(data)
+  return judgeApi(data);
 };

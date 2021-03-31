@@ -5,6 +5,4 @@ async function getPageSetting() {
   return result;
 }
 
-export {
-	getPageSetting
-}
+export { getPageSetting };

@@ -12,21 +12,21 @@ const pageSechema = new mogoose.Schema({
   cookie_juejin: {
     // required: true,
     type: String
-	},
-	cookie_jianshu: {
+  },
+  cookie_jianshu: {
     // required: true,
     type: String
   },
   own_blog_service_path: String,
   updateTime: Number,
-  createTime: Number,
+  createTime: Number
 });
 
 const PageSettingCol = mogoose.model('pageSetting', pageSechema);
 
 const PageSettingModel = {
   async queryOne(): Promise<any> {
-    const result = await PageSettingCol.findOne({})
+    const result = await PageSettingCol.findOne({});
     return result;
   },
   async updatePageSetting(params: UpdatePageSettingType): Promise<Page.Item> {
@@ -37,13 +37,13 @@ const PageSettingModel = {
       {
         upsert: true
       },
-      (error) => {
+      error => {
         if (error) {
-          throw error
+          throw error;
         }
       }
     ) as unknown) as Page.Item;
-  },
+  }
 };
 
 export default PageSettingModel;

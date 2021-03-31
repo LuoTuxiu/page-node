@@ -17,8 +17,9 @@ module.exports = {
     'prettier',
     'prettier/@typescript-eslint'
   ],
-  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'prettier'],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'prettier', 'import'],
   rules: {
+    'import/no-unresolved': 'error',
     '@typescript-eslint/camelcase': 0,
     'import/extensions': 0,
     'react/jsx-filename-extension': ['error', { extensions: ['.tsx'] }],
@@ -27,13 +28,26 @@ module.exports = {
     '@typescript-eslint/no-empty-function': 0
   },
   // // 解决不能直接默认导入 ts 文件 的问题。import/no-unresolved
-  // settings: {
-  //   "import/resolver": {
-  //     "webpack": {
-  //       "config": "build/webpack.base.config.js"
-  //     }
-  //   }
-  // },
+  settings: {
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts', '.js']
+    },
+    'import/resolver': {
+      // "webpack": {
+      //   "config": "build/webpack.base.config.js"
+      // }
+      // 'eslint-import-resolver-custom-alias': {
+      //   alias: {
+      //     '@': './src'
+      //   },
+      //   extensions: ['.ts', '.js']
+      // }
+      typescript: {
+        alwaysTryTypes: true
+        // project: './tsconfig.json'
+      }
+    }
+  },
   overrides: [
     {
       files: ['*.ts'],

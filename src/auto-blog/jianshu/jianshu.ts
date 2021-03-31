@@ -11,24 +11,24 @@ import {
 
 // 获取分类
 const getJianshuCategory = async () => {
-	const [err, data] = await getJianshuCategoryApi();
+  const [err, data] = await getJianshuCategoryApi();
   if (err) {
     console.log('getJianshuCategory error');
     console.log(err);
     return;
-	}
-	return [err, data]
+  }
+  return [err, data];
 };
 
 // 新建简书博客
 const postJianshuCreateDraft = async originParams => {
   const params = {
     data: {
-			"notebook_id": originParams.category_id_jianshu,
-			"title": originParams.title,
-			"at_bottom": true
+      notebook_id: originParams.category_id_jianshu,
+      title: originParams.title,
+      at_bottom: true
     }
-	};
+  };
   const [err, data] = await postJianshuCreateDraftApi(params);
   if (err) {
     console.log('新建简书博客报错');
@@ -128,7 +128,7 @@ const getJianshuArticleList = async () => {
   }
   console.log('获取文章列表成功');
   // console.log(data);
-  return {list: data}
+  return { list: data };
   // data.forEach(async item => {
   //   await jianshuModel.syncJianshuToLocal(item.article_info)
   // })
@@ -141,32 +141,32 @@ const deleteJianshuBlog = async ({ pageId, jianshu_id }) => {
     blogId: jianshu_id
   });
   console.log('====================================');
-  console.log(err)
-  console.log(result)
+  console.log(err);
+  console.log(result);
   console.log('====================================');
-  if (!err || err.error === 'Record not found' || err.err_no === 0) { // err_no = 0 代表成功
+  if (!err || err.error === 'Record not found' || err.err_no === 0) {
+    // err_no = 0 代表成功
     console.log(`删除简书在该行的记录`);
-    await PageModel.updatePage({
+    await PageModel.update({
       jianshu_id: '',
       pageId
     });
-    return
+    return;
     // await jianshuModel.deleteLocalJianshu({ jianshu_id });
   }
-    console.warn('deleteJianshuBlog error')
-    console.log(err);
-    console.log(result);
-    return [err];
-  
+  console.warn('deleteJianshuBlog error');
+  console.log(err);
+  console.log(result);
+  return [err];
 };
 
 // 新建一篇简书博客
 const jianshuAddBlog = async ({ pageId }) => {
-	const { title, content, jianshu_id } = await PageModel.queryOne({
+  const { title, content, jianshu_id } = await PageModel.queryOne({
     // 从本地读取博客信息
     pageId
   });
-  let id = jianshu_id
+  let id = jianshu_id;
   if (!jianshu_id) {
     const [, categoryData] = await getJianshuCategory();
     const { id: category_id_jianshu } = categoryData.find(
@@ -177,27 +177,30 @@ const jianshuAddBlog = async ({ pageId }) => {
       category_id_jianshu,
       title
     });
-    id = createData.id // id为新建博客的id
+    id = createData.id; // id为新建博客的id
   }
-	console.log(`成功新建博客，id是${id}`);
-	const params = {
-    data: {id,"autosave_control":1,title,content}
+  console.log(`成功新建博客，id是${id}`);
+  const params = {
+    data: { id, autosave_control: 1, title, content }
   };
-	await postJianshuUpdateDraftApi(params)
-	console.log(`成功更新博客id为${id}的草稿`);
+  await postJianshuUpdateDraftApi(params);
+  console.log(`成功更新博客id为${id}的草稿`);
   const [err, result] = await postJianshuPublish({
     id
   });
   if (!err) {
-		await getJianshuArticleList()
-		console.log('发布成功了');
-    return [null, {
-      jianshu_id: id,
-      pageId
-    }];
-	} 
+    await getJianshuArticleList();
+    console.log('发布成功了');
+    return [
+      null,
+      {
+        jianshu_id: id,
+        pageId
+      }
+    ];
+  }
   console.log(`失败更新博客${id}，原因是简书端报错: ${err.message}`);
-	return [err]
+  return [err];
 };
 
 /**
@@ -209,7 +212,7 @@ const updateJianshu = async ({ pageId, jianshu_id, content, title }) => {
   // const { category_id } = categoryData.find(
   //   item => item.category.category_name === '前端'
   // );
-  await getJianshuArticleList()
+  await getJianshuArticleList();
   // const {draft_id, category_id} = await JianshuModel.queryOne({
   //   jianshu_id
   // })
