@@ -139,7 +139,7 @@ function initGraphQL(app: Koa): void {
         return result;
       },
       addPage: async (_parent: never, args: any): Promise => {
-        const result = await pageModel.addPage(args.input);
+        const result = await pageModel.add(args.input);
         return result;
       },
       deletePage: async (_parent: never, args: any): Promies => {
