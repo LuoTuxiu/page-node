@@ -120,6 +120,9 @@ async function deleteLocalBlog(params) {
     pageDetail.category.category_name_en,
     pageId
   );
+  console.log('====================================');
+  console.log(`即将删除的path是${path}`);
+  console.log('====================================');
   await deleteLocalFile(path);
   const message = `feat: delete blog: ${pageDetail.title}`;
   await updateGitStatus({ message });
