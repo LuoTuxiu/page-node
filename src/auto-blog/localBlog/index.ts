@@ -15,15 +15,20 @@ import { writeToLocalFile, deleteLocalFile } from './node-file';
 const crypto = require('crypto');
 
 async function updateGitStatus({ message }: { message: string }) {
-  const currentBranch = 'master';
-  // const currentBranch = 'test';
-  await gitCheckBranch({ targetBranch: currentBranch });
-  await gitPull({ targetBranch: currentBranch });
-  await gitAdd();
-  await gitCommit({
-    message
-  });
-  await gitPush({ targetBranch: currentBranch });
+  const currentBranch =
+    process.env.NODE_ENV !== 'production' ? 'master' : 'test';
+  console.log(`即将要变成${currentBranch}分支`);
+  try {
+    await gitCheckBranch({ targetBranch: currentBranch });
+    await gitPull({ targetBranch: currentBranch });
+    await gitAdd();
+    await gitCommit({
+      message
+    });
+    await gitPush({ targetBranch: currentBranch });
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
 
 async function getAllLocalBlog(
