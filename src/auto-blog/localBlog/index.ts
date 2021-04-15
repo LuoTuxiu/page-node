@@ -16,7 +16,7 @@ const crypto = require('crypto');
 
 async function updateGitStatus({ message }: { message: string }) {
   const currentBranch =
-    process.env.NODE_ENV !== 'production' ? 'master' : 'test';
+    process.env.NODE_ENV === 'production' ? 'master' : 'test';
   console.log(`即将要变成${currentBranch}分支`);
   try {
     await gitCheckBranch({ targetBranch: currentBranch });
@@ -128,9 +128,18 @@ async function deleteLocalBlog(params) {
   console.log('====================================');
   console.log(`即将删除的path是${path}`);
   console.log('====================================');
-  await deleteLocalFile(path);
-  const message = `feat: delete blog: ${pageDetail.title}`;
-  await updateGitStatus({ message });
+  const [err] = await deleteLocalFile(path);
+  if (!(err && err.errno === -2)) {
+    // [Error: ENOENT: no such file or directory, stat '/Users/tuxiuluo/Documents/Learn-note/docs/computer/0246c84165f022bf54e0023ea5005e7c.md'] {
+    //   errno: -2,
+    //   code: 'ENOENT',
+    //   syscall: 'stat',
+    //   path: '/Users/tuxiuluo/Documents/Learn-note/docs/computer/0246c84165f022bf54e0023ea5005e7c.md'
+    // }
+    const message = `feat: delete blog: ${pageDetail.title}`;
+    await updateGitStatus({ message });
+  }
+
   return {
     own_blog_id: '',
     pageId
