@@ -16,7 +16,7 @@ const writeToLocalFile = async (path: string, data) => {
 const deleteLocalFile = async (path: string) => {
   return new Promise(resolve => {
     console.log(fs);
-    fs.rm(path, err => {
+    fs.unlink(path, err => {
       if (err) {
         console.log(`删除文件失败，原因是以下`);
         console.log(err);
