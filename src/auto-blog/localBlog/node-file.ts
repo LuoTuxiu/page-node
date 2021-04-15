@@ -17,6 +17,8 @@ const deleteLocalFile = async (path: string) => {
   return new Promise((resolve, reject) => {
     fs.rm(path, err => {
       if (err) {
+        console.log(`删除文件失败，原因是以下`);
+        console.log(err);
         // reject(err)
         resolve(); // 失败了也要当做成功处理，删除记录即可
       } else {
