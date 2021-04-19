@@ -4,6 +4,6 @@ declare namespace user {
     name: string;
     passwd: string;
     createTime: number;
-    roles: [string]
+    roles: [string];
   }
 }

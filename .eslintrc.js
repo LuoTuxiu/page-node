@@ -1,6 +1,5 @@
 module.exports = {
   env: {
-    browser: true,
     commonjs: true,
     es6: true,
     node: true,
@@ -53,13 +52,6 @@ module.exports = {
       files: ['*.ts'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0
-      }
-    },
-    {
-      files: ['*.tsx'],
-      rules: {
-        '@typescript-eslint/explicit-function-return-type': 0,
-        'react/prop-types': 0
       }
     }
   ]
