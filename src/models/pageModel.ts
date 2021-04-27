@@ -108,6 +108,9 @@ const PageModel = {
   },
   async add(params: AddPageType) {
     const { category_id, content, title } = params;
+    if (!title || title === 'undefined') {
+      throw new Error('title required');
+    }
     const md5 = crypto.createHash('md5');
     const pageId = md5.update(`${category_id}\\${title}`).digest('hex');
     // todo 这里先不用判断是否最新，先直接插入数据
