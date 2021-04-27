@@ -15,6 +15,6 @@ declare namespace Page {
     _id: string;
     updateTime: number;
     createTime: number;
-    category_name: string
+    category_name: string;
   }
 }

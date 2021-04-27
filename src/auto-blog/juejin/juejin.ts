@@ -81,7 +81,7 @@ const postUpdateJuejinDraft = async ({ id, category_id, pageId } = {}) => {
       link_url: '',
       cover_image: '',
       title,
-      brief_content: '',
+      brief_content: content.substring(0, 51), // 掘金要求摘要必填，50个字符以上
       edit_type: 10,
       html_content: 'deprecated',
       mark_content: content
@@ -108,7 +108,7 @@ const postJuejinPublish = async ({ id }) => {
   if (err) {
     console.log('postJuejinPublish error');
     console.log(err);
-    return;
+    return [err];
   }
   return [err, data];
 };
@@ -184,6 +184,7 @@ const juejinAddBlog = async ({ pageId, content }) => {
       pageId
     };
   }
+  throw err;
   // await getJuejinArticleList()
 };
 
