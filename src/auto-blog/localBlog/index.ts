@@ -15,8 +15,8 @@ import { writeToLocalFile, deleteLocalFile } from './node-file';
 const crypto = require('crypto');
 
 async function updateGitStatus({ message }: { message: string }) {
-  const currentBranch =
-    process.env.NODE_ENV === 'production' ? 'master' : 'test';
+  const currentBranch = 'master';
+  // process.env.NODE_ENV === 'production' ? 'master' : 'test';
   console.log(`即将要变成${currentBranch}分支`);
   try {
     await gitCheckBranch({ targetBranch: currentBranch });
