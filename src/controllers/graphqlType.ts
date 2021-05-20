@@ -1,6 +1,7 @@
 import { gql } from 'apollo-server-koa';
 
 const typeDefs = gql`
+  "分类"
   type Category {
     "分类更新时间"
     updateTime: String
@@ -15,6 +16,9 @@ const typeDefs = gql`
     _id: String
   }
 
+  """
+  **文章**
+  """
   type Page {
     "pageId，标记page的id"
     pageId: String
