@@ -33,7 +33,7 @@ const postJianshuCreateDraft = async originParams => {
   if (err) {
     console.log('新建简书博客报错');
     console.log(err);
-    return;
+    throw err;
   }
   return [err, data];
 };
@@ -77,7 +77,7 @@ const postUpdateJianshuDraft = async ({ id, category_id, pageId } = {}) => {
   if (err) {
     console.log('postUpdateJianshuDraft error');
     console.log(err);
-    return;
+    throw err;
   }
   return Promise.resolve([err, data]);
 };
@@ -100,7 +100,7 @@ const postAutoUpdateJianshuDraft = async ({ id, title, content } = {}) => {
   if (err) {
     console.log('postAutoUpdateJianshuDraft error');
     console.log(err);
-    return;
+    throw err;
   }
   return Promise.resolve([err, data]);
 };
@@ -124,7 +124,7 @@ const getJianshuArticleList = async () => {
   if (err) {
     console.log('getJianshuArticleList error');
     console.log(err);
-    return;
+    throw err;
   }
   console.log('获取文章列表成功');
   // console.log(data);
